@@ -3,7 +3,10 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 using System.Collections.Generic;
+
+#if !NET20
 using System.Linq;
+#endif
 
 using JetBrains.Annotations;
 
@@ -12,14 +15,15 @@ namespace TypeExtensions
 	/// <summary>
 	/// Extension methods for <see cref="System.Type"/>
 	/// </summary>
-	internal static class TypeExtensions
+	[PublicAPI]
+	public static class TypeExtensions
 	{
 		public const MethodImplOptions AggressiveInlining =
-//#if LESSTHAN_NET45
-//			(MethodImplOptions)256;
-//#else
+#if NET20
+			(MethodImplOptions)256;
+#else
 			MethodImplOptions.AggressiveInlining;
-//#endif
+#endif
 
 		[NotNull]
 		[MethodImpl(AggressiveInlining)]
@@ -291,7 +295,7 @@ namespace TypeExtensions
 		}
 
 
-#if NETCOREAPP1_0
+#if !NETCOREAPP1_0 && !NET20
 
 		[MethodImpl(AggressiveInlining)]
 		public static MethodInfo GetMethod(
@@ -388,10 +392,10 @@ namespace TypeExtensions
 		public static Attribute[] GetCustomAttributes([NotNull] this Type type)
 			=> type.GetTypeInfo().GetCustomAttributes().ToArray();
 
-		[NotNull, ItemNotNull]
-		[MethodImpl(AggressiveInlining)]
-		public static Attribute[] GetCustomAttributes([NotNull] this Type type, Type attributeType, bool inherit)
-			=> type.GetTypeInfo().GetCustomAttributes(attributeType, inherit).ToArray();
+//		[NotNull, ItemNotNull]
+//		[MethodImpl(AggressiveInlining)]
+//		public static Attribute[] GetCustomAttributes([NotNull] this Type type, Type attributeType, bool inherit)
+//			=> type.GetTypeInfo().GetCustomAttributes(attributeType, inherit).ToArray();
 
 		[NotNull]
 		[MethodImpl(AggressiveInlining)]

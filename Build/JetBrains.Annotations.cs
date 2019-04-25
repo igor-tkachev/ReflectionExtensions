@@ -31,6 +31,8 @@ using System;
 // ReSharper disable MemberCanBeProtected.Global
 // ReSharper disable InconsistentNaming
 
+#nullable disable
+
 namespace JetBrains.Annotations
 {
 	 /// <summary>
