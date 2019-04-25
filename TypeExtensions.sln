@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.202
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{236620A7-A359-4E84-9ECD-A22878DFC3E1}"
+	ProjectSection(SolutionItems) = preProject
+		Build\TypeExtensions.Default.props = Build\TypeExtensions.Default.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{C2E1D194-43D2-4AFD-A135-9127A42E6973}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeExtensions", "TypeExtensions\TypeExtensions.csproj", "{3E710714-CDA4-41D5-A324-EC8ED52CAC39}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3E710714-CDA4-41D5-A324-EC8ED52CAC39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E710714-CDA4-41D5-A324-EC8ED52CAC39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E710714-CDA4-41D5-A324-EC8ED52CAC39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E710714-CDA4-41D5-A324-EC8ED52CAC39}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CEF454C6-0D9F-44D2-AE62-988AC5303548}
+	EndGlobalSection
+EndGlobal
