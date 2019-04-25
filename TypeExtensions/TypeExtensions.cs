@@ -52,13 +52,13 @@ namespace TypeExtensions
 		}
 
 		[MethodImpl(AggressiveInlining)]
-		public static bool GetIsSealed([NotNull] this Type type)
+		public static bool IsSealedEx([NotNull] this Type type)
 		{
 			return type.TypeInfo().IsSealed;
 		}
 
 		[MethodImpl(AggressiveInlining)]
-		public static bool GetIsAbstract([NotNull] this Type type)
+		public static bool IsAbstractEx([NotNull] this Type type)
 		{
 			return type.TypeInfo().IsAbstract;
 		}
@@ -246,7 +246,10 @@ namespace TypeExtensions
 		{
 #if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4 || NETSTANDARD1_5 || NETSTANDARD1_6
 			var method = type.GetTypeInfo().GetDeclaredMethod(methodName);
-			method.Invoke(target, new object[] { value });
+			method.Invoke(target,
+#nullable disable
+			new object[] { value });
+#nullable restore
 #else
 			type.InvokeMember(methodName, BindingFlags.InvokeMethod, null, target,
 #nullable disable
