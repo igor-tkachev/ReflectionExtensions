@@ -2,6 +2,6 @@
 	<Import Project="..\Build\TypeExtensions.Default.props" />
 
 	<PropertyGroup>
-		<TargetFrameworks>net472;net20;netcoreapp1.0;netcoreapp2.0;netcoreapp2.2</TargetFrameworks>
+		<TargetFramework>$(TargetFramework)</TargetFramework>
 	</PropertyGroup>
 </Project>
