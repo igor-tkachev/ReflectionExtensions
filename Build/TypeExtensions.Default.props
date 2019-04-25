@@ -1,17 +1,22 @@
-﻿<Project>
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
-		<TargetFrameworks>net72;net20;netcoreapp1.0;netcoreapp2.0;netcoreapp2.2</TargetFrameworks>
+		<TargetFrameworks>net472;net20;netcoreapp1.0;netcoreapp2.0;netcoreapp2.2</TargetFrameworks>
 		<LangVersion>preview</LangVersion>
 		<NullableContextOptions>enable</NullableContextOptions>
 	</PropertyGroup>
-
-	<ItemGroup Condition=" '$(TargetFramework)' != 'net20' ">
-		<Compile Include="*.net20.*.cs" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<Compile Include="..\Build\Jetbrains.Annotations.cs">
 			<Link>Properties\Jetbrains.Annotations.cs</Link>
 		</Compile>
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<Compile Remove="**/*.net20.*" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)'=='net20' ">
+		<Compile Include="**/*.net20.*" />
 	</ItemGroup>
 </Project>
