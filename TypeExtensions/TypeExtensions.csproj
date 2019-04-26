@@ -3,5 +3,6 @@
 
 	<PropertyGroup>
 		<TargetFramework>$(TargetFramework)</TargetFramework>
+		<IsPackable>true</IsPackable>
 	</PropertyGroup>
 </Project>

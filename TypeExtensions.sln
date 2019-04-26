@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{C2E1D194
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeExtensions", "TypeExtensions\TypeExtensions.csproj", "{3E710714-CDA4-41D5-A324-EC8ED52CAC39}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeExtensions.Tests", "TypeExtensions.Tests\TypeExtensions.Tests.csproj", "{7361816D-DCE5-4897-B6AA-2B3177518AFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeExtensions.Tests", "TypeExtensions.Tests\TypeExtensions.Tests.csproj", "{7361816D-DCE5-4897-B6AA-2B3177518AFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
