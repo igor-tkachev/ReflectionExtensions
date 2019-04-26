@@ -332,7 +332,9 @@ namespace TypeExtensions
 		[MethodImpl(AggressiveInlining)]
 		public static T GetPropertyValueEx<T>([NotNull] this Type type, [NotNull] string propertyName, object target)
 		{
+#nullable disable
 			return (T)GetPropertyValueEx(type, propertyName, target);
+#nullable restore
 		}
 
 		[MethodImpl(AggressiveInlining)]
@@ -371,7 +373,9 @@ namespace TypeExtensions
 		[MethodImpl(AggressiveInlining)]
 		public static T GetFieldValueEx<T>([NotNull] this Type type, [NotNull] string fieldName, object target)
 		{
+#nullable disable
 			return (T)GetFieldValueEx(type, fieldName, target);
+#nullable restore
 		}
 
 		[MethodImpl(AggressiveInlining)]

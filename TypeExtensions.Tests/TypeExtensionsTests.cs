@@ -233,19 +233,19 @@ namespace TypeExtensions.Tests
 		}
 
 		[Test]
-		public void GetSetFieldertyValueExTest([Values(nameof(Field1), nameof(Field2))] string FieldertyName)
+		public void GetSetFieldValueExTest([Values(nameof(Field1), nameof(Field2))] string fieldName)
 		{
-			var value = GetType().GetFieldValueEx<int>(FieldertyName, this);
+			var value = GetType().GetFieldValueEx<int>(fieldName, this);
 
 			Assert.That(value, Is.EqualTo(1));
 
-			GetType().SetFieldValueEx(FieldertyName, this, 2);
+			GetType().SetFieldValueEx(fieldName, this, 2);
 
-			var obj = GetType().GetFieldValueEx(FieldertyName, this);
+			var obj = GetType().GetFieldValueEx(fieldName, this);
 
 			Assert.That(obj, Is.EqualTo(2));
 
-			GetType().SetFieldValueEx(FieldertyName, this, 1);
+			GetType().SetFieldValueEx(fieldName, this, 1);
 		}
 	}
 }
