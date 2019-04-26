@@ -284,14 +284,109 @@ namespace TypeExtensions
 		/// <exception cref="T:System.Reflection.AmbiguousMatchException">More than one property is found with the specified name. See Remarks.</exception>
 		/// <exception cref="T:System.ArgumentNullException">
 		/// <paramref name="name" /> is <see langword="null" />. </exception>
-		[Pure]
+		[Pure, CanBeNull]
 		[MethodImpl(AggressiveInlining)]
-		public static PropertyInfo GetPropertyEx([NotNull] this Type type, [NotNull] string name)
+		public static PropertyInfo? GetPropertyEx([NotNull] this Type type, [NotNull] string name)
 		{
 #if NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4
 			return type.GetTypeInfo().GetDeclaredProperty(name);
 #else
 			return type.TypeInfo().GetProperty(name);
+#endif
+		}
+
+		/// <summary>Searches for the public field with the specified name.</summary>
+		/// <param name="type">A <see cref="T:System.Type" /> object.</param>
+		/// <param name="name">The string containing the name of the public field to get. </param>
+		/// <returns>An object representing the public field with the specified name, if found; otherwise, <see langword="null" />.</returns>
+		/// <exception cref="T:System.Reflection.AmbiguousMatchException">More than one field is found with the specified name. See Remarks.</exception>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="name" /> is <see langword="null" />. </exception>
+		[Pure, CanBeNull]
+		[MethodImpl(AggressiveInlining)]
+		public static FieldInfo? GetFieldEx([NotNull] this Type type, [NotNull] string name)
+		{
+#if NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4
+			return type.GetTypeInfo().GetDeclaredField(name);
+#else
+			return type.TypeInfo().GetField(name);
+#endif
+		}
+
+		[MethodImpl(AggressiveInlining)]
+		public static object? GetPropertyValueEx([NotNull] this Type type, [NotNull] string propertyName, object target)
+		{
+#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4 || NETSTANDARD1_5 || NETSTANDARD1_6
+			var property = type.GetTypeInfo().GetDeclaredProperty(propertyName);
+#if NETCOREAPP1_0 || NETCOREAPP1_1
+			if (property == null) throw new MissingFieldException($"The field {propertyName} cannot be found.");
+#else
+			if (property == null) throw new Exception($"The property {propertyName} cannot be found.");
+#endif
+			return property.GetValue(target);
+#else
+			return type.InvokeMember(propertyName, BindingFlags.GetProperty, null, target, null);
+#endif
+		}
+
+		[MethodImpl(AggressiveInlining)]
+		public static T GetPropertyValueEx<T>([NotNull] this Type type, [NotNull] string propertyName, object target)
+		{
+			return (T)GetPropertyValueEx(type, propertyName, target);
+		}
+
+		[MethodImpl(AggressiveInlining)]
+		public static void SetPropertyValueEx(
+			[NotNull] this Type type, [NotNull] string propertyName, object target, object value)
+		{
+#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4 || NETSTANDARD1_5 || NETSTANDARD1_6
+			var property = type.GetTypeInfo().GetDeclaredProperty(propertyName);
+#if NETCOREAPP1_0 || NETCOREAPP1_1
+			if (property == null) throw new MissingFieldException($"The field {propertyName} cannot be found.");
+#else
+			if (property == null) throw new Exception($"The property {propertyName} cannot be found.");
+#endif
+			property.SetValue(target, value);
+#else
+			type.InvokeMember(propertyName, BindingFlags.SetProperty, null, target, new[] { value });
+#endif
+		}
+
+		[MethodImpl(AggressiveInlining)]
+		public static object? GetFieldValueEx([NotNull] this Type type, [NotNull] string fieldName, object target)
+		{
+#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4 || NETSTANDARD1_5 || NETSTANDARD1_6
+			var field = type.GetTypeInfo().GetDeclaredField(fieldName);
+#if NETCOREAPP1_0 || NETCOREAPP1_1
+			if (field == null) throw new MissingFieldException($"The field {fieldName} cannot be found.");
+#else
+			if (field == null) throw new Exception($"The field {fieldName} cannot be found.");
+#endif
+			return field.GetValue(target);
+#else
+			return type.InvokeMember(fieldName, BindingFlags.GetField, null, target, null);
+#endif
+		}
+
+		[MethodImpl(AggressiveInlining)]
+		public static T GetFieldValueEx<T>([NotNull] this Type type, [NotNull] string fieldName, object target)
+		{
+			return (T)GetFieldValueEx(type, fieldName, target);
+		}
+
+		[MethodImpl(AggressiveInlining)]
+		public static void SetFieldValueEx([NotNull] this Type type, [NotNull] string fieldName, object target, object value)
+		{
+#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4 || NETSTANDARD1_5 || NETSTANDARD1_6
+			var field = type.GetTypeInfo().GetDeclaredField(fieldName);
+#if NETCOREAPP1_0 || NETCOREAPP1_1
+			if (field == null) throw new MissingFieldException($"The field {fieldName} cannot be found.");
+#else
+			if (field == null) throw new Exception($"The field {fieldName} cannot be found.");
+#endif
+			field.SetValue(target, value);
+#else
+			type.InvokeMember(fieldName, BindingFlags.SetField | BindingFlags.SetProperty, null, target, new[] { value });
 #endif
 		}
 	}

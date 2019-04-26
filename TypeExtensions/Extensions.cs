@@ -39,58 +39,6 @@ namespace TypeExtensions
 		}
 
 		[MethodImpl(AggressiveInlining)]
-		public static T GetPropertyValue<T>([NotNull] this Type type, [NotNull] string propertyName, object target)
-		{
-#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4 || NETSTANDARD1_5 || NETSTANDARD1_6
-			var property = type.GetTypeInfo().GetDeclaredProperty(propertyName);
-			return (T)property.GetValue(target);
-#else
-			return (T)type.InvokeMember(propertyName, BindingFlags.GetProperty, null, target, null);
-#endif
-		}
-
-		[MethodImpl(AggressiveInlining)]
-		public static void SetPropertyValue(
-			[NotNull] this Type type, [NotNull] string propertyName, object target, object value)
-		{
-#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4 || NETSTANDARD1_5 || NETSTANDARD1_6
-			var property = type.GetTypeInfo().GetDeclaredProperty(propertyName);
-			property.SetValue(target, value);
-#else
-			type.InvokeMember(propertyName, BindingFlags.SetProperty, null, target, new[] { value });
-#endif
-		}
-
-		[MethodImpl(AggressiveInlining)]
-		public static T GetFieldValue<T>([NotNull] this Type type, [NotNull] string fieldName, object target)
-		{
-#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4 || NETSTANDARD1_5 || NETSTANDARD1_6
-			var field = type.GetTypeInfo().GetDeclaredField(fieldName);
-			return (T)field.GetValue(target);
-#else
-			return (T)type.InvokeMember(fieldName, BindingFlags.GetField | BindingFlags.GetProperty, null, target, null);
-#endif
-		}
-
-		[MethodImpl(AggressiveInlining)]
-		public static void SetFieldValue([NotNull] this Type type, [NotNull] string fieldName, object target, object value)
-		{
-#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4 || NETSTANDARD1_5 || NETSTANDARD1_6
-			var field = type.GetTypeInfo().GetDeclaredField(fieldName);
-			if (field != null)
-			{
-				field.SetValue(target, value);
-			}
-			else
-			{
-				type.SetPropertyValue(fieldName, target, value);
-			}
-#else
-			type.InvokeMember(fieldName, BindingFlags.SetField | BindingFlags.SetProperty, null, target, new[] { value });
-#endif
-		}
-
-		[MethodImpl(AggressiveInlining)]
 		public static void InvokeMethod<T>([NotNull] this Type type, [NotNull] string methodName, object target, T value)
 		{
 #if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4 || NETSTANDARD1_5 || NETSTANDARD1_6
@@ -106,7 +54,6 @@ namespace TypeExtensions
 #nullable restore
 #endif
 		}
-
 
 #if !NETCOREAPP1_0 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6
 		const BindingFlags DefaultLookup = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public;

@@ -155,13 +155,6 @@ namespace TypeExtensions.Tests
 		}
 
 		[Test]
-		public void GetPropertyExTest()
-		{
-			var info = typeof(List<int>).GetPropertyEx(nameof(List<int>.Count));
-			Assert.That(info, Is.Not.Null);
-		}
-
-		[Test]
 		public void GetCustomAttributeExTest1()
 		{
 			var info = typeof(TypeExtensionsTests).GetCustomAttributeEx<TestFixtureAttribute>();
@@ -201,6 +194,58 @@ namespace TypeExtensions.Tests
 		{
 			var info = typeof(TypeExtensionsTests).GetCustomAttributesEx(typeof(TestFixtureAttribute), true);
 			Assert.That(info, Is.Not.Null);
+		}
+
+		public        int Prop1 { get; set;} = 1;
+		public static int Prop2 { get; set;} = 1;
+
+		[Test]
+		public void GetPropertyExTest([Values(nameof(Prop1), nameof(Prop2))] string propertyName)
+		{
+			var prop = GetType().GetPropertyEx(propertyName);
+			Assert.That(prop, Is.Not.Null);
+		}
+
+		public        int Field1 = 1;
+		public static int Field2 = 1;
+
+		[Test]
+		public void GetFieldExTest([Values(nameof(Field1), nameof(Field2))] string fieldName)
+		{
+			var info = GetType().GetFieldEx(fieldName);
+			Assert.That(info, Is.Not.Null);
+		}
+
+		[Test]
+		public void GetSetPropertyValueExTest([Values(nameof(Prop1), nameof(Prop2))] string propertyName)
+		{
+			var value = GetType().GetPropertyValueEx<int>(propertyName, this);
+
+			Assert.That(value, Is.EqualTo(1));
+
+			GetType().SetPropertyValueEx(propertyName, this, 2);
+
+			var obj = GetType().GetPropertyValueEx(propertyName, this);
+
+			Assert.That(obj, Is.EqualTo(2));
+
+			GetType().SetPropertyValueEx(propertyName, this, 1);
+		}
+
+		[Test]
+		public void GetSetFieldertyValueExTest([Values(nameof(Field1), nameof(Field2))] string FieldertyName)
+		{
+			var value = GetType().GetFieldValueEx<int>(FieldertyName, this);
+
+			Assert.That(value, Is.EqualTo(1));
+
+			GetType().SetFieldValueEx(FieldertyName, this, 2);
+
+			var obj = GetType().GetFieldValueEx(FieldertyName, this);
+
+			Assert.That(obj, Is.EqualTo(2));
+
+			GetType().SetFieldValueEx(FieldertyName, this, 1);
 		}
 	}
 }
