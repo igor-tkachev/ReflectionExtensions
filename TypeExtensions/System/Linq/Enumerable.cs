@@ -1,4 +1,7 @@
 ﻿using System;
+
+#if NET20 || NET30
+
 using System.Collections;
 using System.Collections.Generic;
 
@@ -115,3 +118,4 @@ namespace System.Linq
 	}
 }
 
+#endif

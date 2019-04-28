@@ -4,5 +4,23 @@
 	<PropertyGroup>
 		<TargetFramework>$(TargetFramework)</TargetFramework>
 		<IsPackable>true</IsPackable>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
+
+	<ItemGroup Condition=" $(TargetFramework.StartsWith('netcoreapp')) OR '$(TargetFramework)'=='netstandard1.3' OR '$(TargetFramework)'=='netstandard1.4' OR '$(TargetFramework)'=='netstandard1.5' OR '$(TargetFramework)'=='netstandard1.6' OR $(TargetFramework.StartsWith('netstandard2')) ">
+		<PackageReference Include="Microsoft.Win32.Registry" Version="4.5.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+		<None Update="System\ValueTuple.tt">
+			<Generator>TextTemplatingFileGenerator</Generator>
+			<LastGenOutput>ValueTuple.generated.cs</LastGenOutput>
+		</None>
+		<Compile Update="System\ValueTuple.generated.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>ValueTuple.tt</DependentUpon>
+		</Compile>
+	</ItemGroup>
 </Project>

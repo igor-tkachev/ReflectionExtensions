@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 
 namespace TypeExtensions
 {
-	partial class Extensions
+	public static partial class Extensions
 	{
 		internal const MethodImplOptions AggressiveInlining =
 #if NET20 || NET30 || NET35 || NET40
@@ -391,6 +391,21 @@ namespace TypeExtensions
 			field.SetValue(target, value);
 #else
 			type.InvokeMember(fieldName, BindingFlags.SetField | BindingFlags.SetProperty, null, target, new[] { value });
+#endif
+		}
+
+		[MethodImpl(AggressiveInlining)]
+		public static object? InvokeMethodEx([NotNull] this Type type, [NotNull] string methodName, object target, params object[] parameters)
+		{
+#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4 || NETSTANDARD1_5 || NETSTANDARD1_6
+			var method = type.GetTypeInfo().GetDeclaredMethod(methodName);
+#nullable disable
+			return method.Invoke(target, parameters);
+#nullable restore
+#else
+#nullable disable
+			return type.InvokeMember(methodName, BindingFlags.InvokeMethod, null, target, parameters);
+#nullable restore
 #endif
 		}
 	}

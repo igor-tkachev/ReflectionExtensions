@@ -247,5 +247,14 @@ namespace TypeExtensions.Tests
 
 			GetType().SetFieldValueEx(fieldName, this, 1);
 		}
+
+		public object TestMethod(int n) => n * 2;
+
+		[Test]
+		public void InvokeMethodExTest([Values(1, 2)] int value)
+		{
+			var result = GetType().InvokeMethodEx(nameof(TestMethod), this, value);
+			Assert.That(result, Is.EqualTo(value * 2));
+		}
 	}
 }

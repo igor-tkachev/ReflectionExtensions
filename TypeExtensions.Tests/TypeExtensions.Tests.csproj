@@ -2,7 +2,7 @@
 	<Import Project="..\Build\TypeExtensions.Default.props" />
 
 	<PropertyGroup>
-		<TargetFrameworks>net462;net461;net46;net452;net451;net45;net40;net35;net30;net20;netcoreapp1.0;netcoreapp1.1;netcoreapp2.0;netcoreapp2.1;netcoreapp2.2;netstandard1.4;netstandard1.5;netstandard1.6;netstandard2.0</TargetFrameworks>
+		<TargetFrameworks>net472;net45;net40;net35;net30;net20;netcoreapp1.0;netcoreapp1.1;netcoreapp2.0;netcoreapp2.1;netcoreapp2.2;netstandard1.4;netstandard1.5;netstandard1.6;netstandard2.0</TargetFrameworks>
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 
@@ -12,6 +12,11 @@
 		<PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
 
 		<ProjectReference Include="..\TypeExtensions\TypeExtensions.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="..\TypeExtensions\System\ValueTuple.cs" Link="ValueTuple.cs" />
+		<Compile Include="..\TypeExtensions\System\ValueTuple.generated.cs" Link="ValueTuple.generated.cs" />
 	</ItemGroup>
 
 </Project>
