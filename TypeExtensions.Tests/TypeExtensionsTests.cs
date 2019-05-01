@@ -256,5 +256,11 @@ namespace TypeExtensions.Tests
 			var result = GetType().InvokeMethodEx(nameof(TestMethod), this, value);
 			Assert.That(result, Is.EqualTo(value * 2));
 		}
+
+		[Test]
+		public void TypeInitializerExTest()
+		{
+			var type = GetType().TypeInitializerEx();
+		}
 	}
 }

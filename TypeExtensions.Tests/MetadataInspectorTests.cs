@@ -25,15 +25,5 @@ namespace TypeExtensions.Tests
 		{
 			Console.WriteLine(MetadataInspector.RuntimeVersion);
 		}
-
-		[Test]
-		public void PrintTupleTest()
-		{
-			Console.WriteLine(("", 2, 3, null as string, 5, 6, 7));
-			Console.WriteLine(("", 2, 3, null as string, 5, 6, 7, 8));
-			Console.WriteLine(("", 2, 3, null as string, 5, 6, 7, 8, 9));
-
-			var t = ValueTuple.Create(1, 2, 3, 4, 5, 6, 7, 8);
-		}
 	}
 }

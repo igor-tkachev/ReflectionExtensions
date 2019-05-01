@@ -7,24 +7,24 @@ namespace TypeExtensions.Metadata
 		public string  Name        { get; }
 		public string? SubName     { get; }
 		public string  Version     { get; }
-		public string? SP          { get; }
+		public string? ServicePack { get; }
 		public string? InstallPath { get; }
 
-		public InstalledFrameworkInfo(string name, string? subName, string version, string? sp, string? installPath)
+		public InstalledFrameworkInfo(string name, string? subName, string version, string? servicePack, string? installPath)
 		{
 			Name        = name;
 			SubName     = subName;
 			Version     = version;
-			SP          = sp;
+			ServicePack = servicePack;
 			InstallPath = installPath;
 		}
 
-		public void Deconstruct(out string name, out string? subName, out string version, out string? sp, out string? installPath)
+		public void Deconstruct(out string name, out string? subName, out string version, out string? servicePack, out string? installPath)
 		{
 			name        = Name;
 			subName     = SubName;
 			version     = Version;
-			sp          = SP;
+			servicePack = ServicePack;
 			installPath = InstallPath;
 		}
 

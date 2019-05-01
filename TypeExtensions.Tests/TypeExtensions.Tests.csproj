@@ -10,13 +10,8 @@
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
 		<PackageReference Include="NUnit" Version="3.11.0" />
 		<PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
+		<PackageReference Include="Portable.System.ValueTuple" Version="1.0.0" />
 
 		<ProjectReference Include="..\TypeExtensions\TypeExtensions.csproj" />
 	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Include="..\TypeExtensions\System\ValueTuple.cs" Link="ValueTuple.cs" />
-		<Compile Include="..\TypeExtensions\System\ValueTuple.generated.cs" Link="ValueTuple.generated.cs" />
-	</ItemGroup>
-
 </Project>
