@@ -18,6 +18,8 @@ namespace TypeExtensions
 	[PublicAPI]
 	public static partial class Extensions
 	{
+		#region Helpers
+
 		internal const MethodImplOptions AggressiveInlining =
 #if NET20 || NET30 || NET35 || NET40
 			(MethodImplOptions)256;
@@ -39,6 +41,10 @@ namespace TypeExtensions
 			return type;
 		}
 #endif
+
+		#endregion
+
+		#region Common
 
 		/// <summary>Gets a <see cref="T:System.Reflection.MemberTypes" /> value indicating that this member is a type or a nested type.</summary>
 		/// <returns>A <see cref="T:System.Reflection.MemberTypes" /> value indicating that this member is a type or a nested type.</returns>
@@ -105,26 +111,6 @@ namespace TypeExtensions
 			return type.TypeInfo().Module;
 		}
 
-		/// <summary>Gets a value indicating whether the current <see cref="T:System.Type" /> object represents a type whose definition is nested inside the definition of another type.</summary>
-		/// <returns>
-		/// <see langword="true" /> if the <see cref="T:System.Type" /> is nested inside another type; otherwise, <see langword="false" />.
-		/// </returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static bool IsNestedEx([NotNull] this Type type)
-		{
-			return type.IsNested;
-		}
-
-		/// <summary>Gets the type that declares the current nested type or generic type parameter.</summary>
-		/// <returns>A <see cref="T:System.Type" /> object representing the enclosing type, if the current type is a nested type; or the generic type definition, if the current type is a type parameter of a generic type; or the type that declares the generic method, if the current type is a type parameter of a generic method; otherwise, <see langword="null" />.</returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static Type? DeclaringTypeEx([NotNull] this Type type)
-		{
-			return type.DeclaringType;
-		}
-
 		/// <summary>
 		/// Gets a <see cref="T:System.Reflection.MethodBase" /> that represents the declaring method, if the current <see cref="T:System.Type" /> represents a type parameter of a generic method.</summary>
 		/// <returns>If the current <see cref="T:System.Type" /> represents a type parameter of a generic method, a <see cref="T:System.Reflection.MethodBase" /> that represents declaring method; otherwise, <see langword="null" />.</returns>
@@ -133,6 +119,39 @@ namespace TypeExtensions
 		public static MethodBase? DeclaringMethodEx([NotNull] this Type type)
 		{
 			return type.TypeInfo().DeclaringMethod;
+		}
+
+		/// <summary>Gets the attributes associated with the <see cref="T:System.Type" />.</summary>
+		/// <returns>A <see cref="T:System.Reflection.TypeAttributes" /> object representing the attribute set of the <see cref="T:System.Type" />, unless the <see cref="T:System.Type" /> represents a generic type parameter, in which case the value is unspecified. </returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static TypeAttributes AttributesEx([NotNull] this Type type)
+		{
+			return type.TypeInfo().Attributes;
+		}
+
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static StructLayoutAttribute StructLayoutAttributeEx([NotNull] this Type type)
+		{
+#if NETSTANDARDLESS1_4
+			throw new NotSupportedException();
+#else
+			return type.TypeInfo().StructLayoutAttribute;
+#endif
+		}
+
+		#endregion
+
+		#region Type
+
+		/// <summary>Gets the type that declares the current nested type or generic type parameter.</summary>
+		/// <returns>A <see cref="T:System.Type" /> object representing the enclosing type, if the current type is a nested type; or the generic type definition, if the current type is a type parameter of a generic type; or the type that declares the generic method, if the current type is a type parameter of a generic method; otherwise, <see langword="null" />.</returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static Type? DeclaringTypeEx([NotNull] this Type type)
+		{
+			return type.DeclaringType;
 		}
 
 		/// <summary>Gets the class object that was used to obtain this member. </summary>
@@ -161,6 +180,10 @@ namespace TypeExtensions
 #endif
 		}
 
+		#endregion
+
+		#region Is Flags
+
 		/// <summary>Gets a value that indicates whether the type is an array.</summary>
 		/// <returns><see langword="true" /> if the current type is an array; otherwise, <see langword="false" />.</returns>
 		[Pure]
@@ -188,156 +211,6 @@ namespace TypeExtensions
 		public static bool IsPointerEx([NotNull] this Type type)
 		{
 			return type.TypeInfo().IsPointer;
-		}
-
-		/// <summary>Gets a value indicating whether the current <see cref="T:System.Type" /> represents a type parameter in the definition of a generic type or method.</summary>
-		/// <returns>
-		/// <see langword="true" /> if the <see cref="T:System.Type" /> object represents a type parameter of a generic type definition or generic method definition; otherwise, <see langword="false" />.</returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static bool IsGenericParameterEx([NotNull] this Type type)
-		{
-			return type.TypeInfo().IsGenericParameter;
-		}
-
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static bool IsGenericTypeParameterEx([NotNull] this Type type)
-		{
-#if NET20 || NET30 || NET35 || NET40 || NET45 || NET451 || NET452 || NET46 || NET461 || NET462  || NET47 || NET471 || NET472 || NETCOREAPP1_0 || NETCOREAPP1_1 || NETCOREAPP2_0 || NETSTANDARDLESS1_6 || NETSTANDARD2_0
-
-			return type.IsGenericParameter && type.DeclaringMethodEx() == null;
-#else
-			return type.TypeInfo().IsGenericTypeParameter;
-#endif
-		}
-
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static bool IsGenericMethodParameterEx([NotNull] this Type type)
-		{
-#if NET20 || NET30 || NET35 || NET40 || NET45 || NET451 || NET452 || NET46 || NET461 || NET462  || NET47 || NET471 || NET472 || NETCOREAPP1_0 || NETCOREAPP1_1 || NETCOREAPP2_0 || NETSTANDARDLESS1_6 || NETSTANDARD2_0
-
-			return type.IsGenericParameter && type.DeclaringMethodEx() != null;
-#else
-			return type.TypeInfo().IsGenericMethodParameter;
-#endif
-		}
-
-		/// <summary>Gets a value indicating whether the current type is a generic type.</summary>
-		/// <returns><see langword="true" /> if the current type is a generic type; otherwise,<see langword=" false" />.</returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static bool IsGenericTypeEx([NotNull] this Type type)
-		{
-			return type.TypeInfo().IsGenericType;
-		}
-
-		/// <summary>Gets a value indicating whether the current <see cref="T:System.Type" /> represents a generic type definition, from which other generic types can be constructed.</summary>
-		/// <returns><see langword="true" /> if the <see cref="T:System.Type" /> object represents a generic type definition; otherwise, <see langword="false" />.</returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static bool IsGenericTypeDefinitionEx([NotNull] this Type type)
-		{
-			return type.TypeInfo().IsGenericTypeDefinition;
-		}
-
-		/// <summary>Gets a value indicating whether the current <see cref="T:System.Type" /> encompasses or refers to another type; that is, whether the current <see cref="T:System.Type" /> is an array, a pointer, or is passed by reference.</summary>
-		/// <returns>
-		/// <see langword="true" /> if the <see cref="T:System.Type" /> is an array, a pointer, or is passed by reference; otherwise, <see langword="false" />.</returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static bool HasElementTypeEx([NotNull] this Type type)
-		{
-			return type.HasElementType;
-		}
-
-		/// <summary>When overridden in a derived class, returns the <see cref="T:System.Type" /> of the object encompassed or referred to by the current array, pointer or reference type.</summary>
-		/// <returns>The <see cref="T:System.Type" /> of the object encompassed or referred to by the current array, pointer, or reference type, or <see langword="null" /> if the current <see cref="T:System.Type" /> is not an array or a pointer, or is not passed by reference, or represents a generic type or a type parameter in the definition of a generic type or generic method.</returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static Type GetElementTypeEx([NotNull] this Type type)
-		{
-			return type.GetElementType();
-		}
-
-		/// <summary>Gets the number of dimensions in an array. </summary>
-		/// <returns>An integer that contains the number of dimensions in the current type. </returns>
-		/// <exception cref="T:System.NotSupportedException">The functionality of this method is unsupported in the base class and must be implemented in a derived class instead. </exception>
-		/// <exception cref="T:System.ArgumentException">The current type is not an array. </exception>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static int GetArrayRankEx([NotNull] this Type type)
-		{
-			return type.GetArrayRank();
-		}
-
-		/// <summary>Returns a <see cref="T:System.Type" /> object that represents a generic type definition from which the current generic type can be constructed.</summary>
-		/// <returns>A <see cref="T:System.Type" /> object representing a generic type from which the current type can be constructed.</returns>
-		/// <exception cref="T:System.InvalidOperationException">The current type is not a generic type.  That is, <see cref="P:System.Type.IsGenericType" /> returns <see langword="false" />. </exception>
-		/// <exception cref="T:System.NotSupportedException">The invoked method is not supported in the base class. Derived classes must provide an implementation.</exception>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static Type GetGenericTypeDefinitionEx([NotNull] this Type type)
-		{
-			return type.GetGenericTypeDefinition();
-		}
-
-		/// <summary>Gets an array of the generic type arguments for this type.</summary>
-		/// <returns>An array of the generic type arguments for this type.</returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static Type[] GenericTypeArgumentsEx([NotNull] this Type type)
-		{
-#if NET20 || NET30 || NET35 || NET40
-			return (type.IsGenericType && !type.IsGenericTypeDefinition) ? type.GetGenericArguments() : new Type[0];
-#else
-			return type.GenericTypeArguments;
-#endif
-		}
-
-		/// <summary>Returns an array of <see cref="T:System.Type" /> objects that represent the type arguments of a closed generic type or the type parameters of a generic type definition.</summary>
-		/// <returns>An array of <see cref="T:System.Type" /> objects that represent the type arguments of a generic type. Returns an empty array if the current type is not a generic type.</returns>
-		/// <exception cref="T:System.NotSupportedException">The invoked method is not supported in the base class. Derived classes must provide an implementation.</exception>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static Type[] GetGenericArgumentsEx([NotNull] this Type type)
-		{
-#if NETSTANDARDLESS1_4
-			throw new NotSupportedException();
-#else
-			return type.TypeInfo().GetGenericArguments();
-#endif
-		}
-
-		/// <summary>Gets the position of the type parameter in the type parameter list of the generic type or method that declared the parameter, when the <see cref="T:System.Type" /> object represents a type parameter of a generic type or a generic method.</summary>
-		/// <returns>The position of a type parameter in the type parameter list of the generic type or method that defines the parameter. Position numbers begin at 0.</returns>
-		/// <exception cref="T:System.InvalidOperationException">The current type does not represent a type parameter. That is, <see cref="P:System.Type.IsGenericParameter" /> returns <see langword="false" />. </exception>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static int GenericParameterPositionEx([NotNull] this Type type)
-		{
-			return type.GenericParameterPosition;
-		}
-
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static GenericParameterAttributes GenericParameterAttributesEx([NotNull] this Type type)
-		{
-#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARDLESS1_6
-			throw new NotSupportedException();
-#else
-			return type.GenericParameterAttributes;
-#endif
-		}
-
-		/// <summary>Gets the attributes associated with the <see cref="T:System.Type" />.</summary>
-		/// <returns>A <see cref="T:System.Reflection.TypeAttributes" /> object representing the attribute set of the <see cref="T:System.Type" />, unless the <see cref="T:System.Type" /> represents a generic type parameter, in which case the value is unspecified. </returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static TypeAttributes AttributesEx([NotNull] this Type type)
-		{
-			return type.TypeInfo().Attributes;
 		}
 
 		/// <summary>Gets a value indicating whether the <see cref="T:System.Type" /> is abstract and must be overridden.</summary>
@@ -385,68 +258,6 @@ namespace TypeExtensions
 		public static bool IsClassEx([NotNull] this Type type)
 		{
 			return type.TypeInfo().IsClass;
-		}
-
-		/// <summary>Gets a value indicating whether the <see cref="T:System.Type" /> is nested and visible only within its own assembly.</summary>
-		/// <returns> <see langword="true" /> if the <see cref="T:System.Type" /> is nested and visible only within its own assembly; otherwise, <see langword="false" />.</returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static bool IsNestedAssemblyEx([NotNull] this Type type)
-		{
-			return type.TypeInfo().IsNestedAssembly;
-		}
-
-		/// <summary>Gets a value indicating whether the <see cref="T:System.Type" /> is nested and visible only to classes that belong to both its own family and its own assembly.</summary>
-		/// <returns>
-		/// <see langword="true" /> if the <see cref="T:System.Type" /> is nested and visible only to classes that belong to both its own family and its own assembly; otherwise, <see langword="false" />.
-		/// </returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static bool IsNestedFamANDAssemEx([NotNull] this Type type)
-		{
-			return type.TypeInfo().IsNestedFamANDAssem;
-		}
-
-		/// <summary>Gets a value indicating whether the <see cref="T:System.Type" /> is nested and visible only within its own family.</summary>
-		/// <returns>
-		/// <see langword="true" /> if the <see cref="T:System.Type" /> is nested and visible only within its own family; otherwise, <see langword="false" />.
-		/// </returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static bool IsNestedFamilyEx([NotNull] this Type type)
-		{
-			return type.TypeInfo().IsNestedFamily;
-		}
-
-		/// <summary>Gets a value indicating whether the <see cref="T:System.Type" /> is nested and visible only to classes that belong to either its own family or to its own assembly.</summary>
-		/// <returns>
-		/// <see langword="true" /> if the <see cref="T:System.Type" /> is nested and visible only to classes that belong to its own family or to its own assembly; otherwise, <see langword="false" />.
-		/// </returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static bool IsNestedFamORAssemEx([NotNull] this Type type)
-		{
-			return type.TypeInfo().IsNestedFamORAssem;
-		}
-
-		/// <summary>Gets a value indicating whether the <see cref="T:System.Type" /> is nested and declared private.</summary>
-		/// <returns>
-		/// <see langword="true" /> if the <see cref="T:System.Type" /> is nested and declared private; otherwise, <see langword="false" />.
-		/// </returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static bool IsNestedPrivateEx([NotNull] this Type type)
-		{
-			return type.TypeInfo().IsNestedPrivate;
-		}
-
-		/// <summary>Gets a value indicating whether a class is nested and declared public.</summary>
-		/// <returns><see langword="true" /> if the class is nested and declared public; otherwise, <see langword="false" />.</returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static bool IsNestedPublicEx([NotNull] this Type type)
-		{
-			return type.TypeInfo().IsNestedPublic;
 		}
 
 		/// <summary>Gets a value indicating whether the <see cref="T:System.Type" /> is not declared public.</summary>
@@ -597,16 +408,158 @@ namespace TypeExtensions
 			return type.TypeInfo().IsValueType;
 		}
 
+		#endregion
+
+		#region Array
+
+		/// <summary>Gets a value indicating whether the current <see cref="T:System.Type" /> encompasses or refers to another type; that is, whether the current <see cref="T:System.Type" /> is an array, a pointer, or is passed by reference.</summary>
+		/// <returns>
+		/// <see langword="true" /> if the <see cref="T:System.Type" /> is an array, a pointer, or is passed by reference; otherwise, <see langword="false" />.</returns>
 		[Pure]
 		[MethodImpl(AggressiveInlining)]
-		public static StructLayoutAttribute StructLayoutAttributeEx([NotNull] this Type type)
+		public static bool HasElementTypeEx([NotNull] this Type type)
+		{
+			return type.HasElementType;
+		}
+
+		/// <summary>When overridden in a derived class, returns the <see cref="T:System.Type" /> of the object encompassed or referred to by the current array, pointer or reference type.</summary>
+		/// <returns>The <see cref="T:System.Type" /> of the object encompassed or referred to by the current array, pointer, or reference type, or <see langword="null" /> if the current <see cref="T:System.Type" /> is not an array or a pointer, or is not passed by reference, or represents a generic type or a type parameter in the definition of a generic type or generic method.</returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static Type GetElementTypeEx([NotNull] this Type type)
+		{
+			return type.GetElementType();
+		}
+
+		/// <summary>Gets the number of dimensions in an array. </summary>
+		/// <returns>An integer that contains the number of dimensions in the current type. </returns>
+		/// <exception cref="T:System.NotSupportedException">The functionality of this method is unsupported in the base class and must be implemented in a derived class instead. </exception>
+		/// <exception cref="T:System.ArgumentException">The current type is not an array. </exception>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static int GetArrayRankEx([NotNull] this Type type)
+		{
+			return type.GetArrayRank();
+		}
+
+		#endregion
+
+		#region Generic
+
+		/// <summary>Gets a value indicating whether the current <see cref="T:System.Type" /> represents a type parameter in the definition of a generic type or method.</summary>
+		/// <returns>
+		/// <see langword="true" /> if the <see cref="T:System.Type" /> object represents a type parameter of a generic type definition or generic method definition; otherwise, <see langword="false" />.</returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static bool IsGenericParameterEx([NotNull] this Type type)
+		{
+			return type.TypeInfo().IsGenericParameter;
+		}
+
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static bool IsGenericTypeParameterEx([NotNull] this Type type)
+		{
+#if NET20 || NET30 || NET35 || NET40 || NET45 || NET451 || NET452 || NET46 || NET461 || NET462  || NET47 || NET471 || NET472 || NETCOREAPP1_0 || NETCOREAPP1_1 || NETCOREAPP2_0 || NETSTANDARDLESS1_6 || NETSTANDARD2_0
+
+			return type.IsGenericParameter && type.DeclaringMethodEx() == null;
+#else
+			return type.TypeInfo().IsGenericTypeParameter;
+#endif
+		}
+
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static bool IsGenericMethodParameterEx([NotNull] this Type type)
+		{
+#if NET20 || NET30 || NET35 || NET40 || NET45 || NET451 || NET452 || NET46 || NET461 || NET462  || NET47 || NET471 || NET472 || NETCOREAPP1_0 || NETCOREAPP1_1 || NETCOREAPP2_0 || NETSTANDARDLESS1_6 || NETSTANDARD2_0
+
+			return type.IsGenericParameter && type.DeclaringMethodEx() != null;
+#else
+			return type.TypeInfo().IsGenericMethodParameter;
+#endif
+		}
+
+		/// <summary>Gets a value indicating whether the current type is a generic type.</summary>
+		/// <returns><see langword="true" /> if the current type is a generic type; otherwise,<see langword=" false" />.</returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static bool IsGenericTypeEx([NotNull] this Type type)
+		{
+			return type.TypeInfo().IsGenericType;
+		}
+
+		/// <summary>Gets a value indicating whether the current <see cref="T:System.Type" /> represents a generic type definition, from which other generic types can be constructed.</summary>
+		/// <returns><see langword="true" /> if the <see cref="T:System.Type" /> object represents a generic type definition; otherwise, <see langword="false" />.</returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static bool IsGenericTypeDefinitionEx([NotNull] this Type type)
+		{
+			return type.TypeInfo().IsGenericTypeDefinition;
+		}
+
+		/// <summary>Returns a <see cref="T:System.Type" /> object that represents a generic type definition from which the current generic type can be constructed.</summary>
+		/// <returns>A <see cref="T:System.Type" /> object representing a generic type from which the current type can be constructed.</returns>
+		/// <exception cref="T:System.InvalidOperationException">The current type is not a generic type.  That is, <see cref="P:System.Type.IsGenericType" /> returns <see langword="false" />. </exception>
+		/// <exception cref="T:System.NotSupportedException">The invoked method is not supported in the base class. Derived classes must provide an implementation.</exception>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static Type GetGenericTypeDefinitionEx([NotNull] this Type type)
+		{
+			return type.GetGenericTypeDefinition();
+		}
+
+		/// <summary>Gets an array of the generic type arguments for this type.</summary>
+		/// <returns>An array of the generic type arguments for this type.</returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static Type[] GenericTypeArgumentsEx([NotNull] this Type type)
+		{
+#if NET20 || NET30 || NET35 || NET40
+			return (type.IsGenericType && !type.IsGenericTypeDefinition) ? type.GetGenericArguments() : new Type[0];
+#else
+			return type.GenericTypeArguments;
+#endif
+		}
+
+		/// <summary>Returns an array of <see cref="T:System.Type" /> objects that represent the type arguments of a closed generic type or the type parameters of a generic type definition.</summary>
+		/// <returns>An array of <see cref="T:System.Type" /> objects that represent the type arguments of a generic type. Returns an empty array if the current type is not a generic type.</returns>
+		/// <exception cref="T:System.NotSupportedException">The invoked method is not supported in the base class. Derived classes must provide an implementation.</exception>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static Type[] GetGenericArgumentsEx([NotNull] this Type type)
 		{
 #if NETSTANDARDLESS1_4
 			throw new NotSupportedException();
 #else
-			return type.TypeInfo().StructLayoutAttribute;
+			return type.TypeInfo().GetGenericArguments();
 #endif
 		}
+
+		/// <summary>Gets the position of the type parameter in the type parameter list of the generic type or method that declared the parameter, when the <see cref="T:System.Type" /> object represents a type parameter of a generic type or a generic method.</summary>
+		/// <returns>The position of a type parameter in the type parameter list of the generic type or method that defines the parameter. Position numbers begin at 0.</returns>
+		/// <exception cref="T:System.InvalidOperationException">The current type does not represent a type parameter. That is, <see cref="P:System.Type.IsGenericParameter" /> returns <see langword="false" />. </exception>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static int GenericParameterPositionEx([NotNull] this Type type)
+		{
+			return type.GenericParameterPosition;
+		}
+
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static GenericParameterAttributes GenericParameterAttributesEx([NotNull] this Type type)
+		{
+#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARDLESS1_6
+			throw new NotSupportedException();
+#else
+			return type.GenericParameterAttributes;
+#endif
+		}
+
+		#endregion
+
+		#region Constructor
 
 		/// <summary>Gets the initializer for the type.</summary>
 		/// <returns>An object that contains the name of the class constructor for the <see cref="T:System.Type" />.</returns>
@@ -703,6 +656,29 @@ namespace TypeExtensions
 #endif
 		}
 
+#if !NETSTANDARDLESS1_4
+
+		/// <summary>When overridden in a derived class, searches for the constructors defined for the current <see cref="T:System.Type" />, using the specified <see langword="BindingFlags" />.</summary>
+		/// <param name="bindingAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted.-or- Zero, to return <see langword="null" />. </param>
+		/// <returns>
+		/// An array of <see cref="T:System.Reflection.ConstructorInfo" /> objects representing all constructors defined for the current <see cref="T:System.Type" />
+		/// that match the specified binding constraints, including the type initializer if it is defined. Returns an empty array of type <see cref="T:System.Reflection.ConstructorInfo" />
+		/// if no constructors are defined for the current <see cref="T:System.Type" />, if none of the defined constructors match the binding constraints,
+		/// or if the current <see cref="T:System.Type" /> represents a type parameter in the definition of a generic type or generic method.
+		/// </returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static ConstructorInfo[] GetConstructorsEx([NotNull] this Type type, BindingFlags bindingAttr)
+		{
+			return type.TypeInfo().GetConstructors(bindingAttr);
+		}
+
+#endif
+
+		#endregion
+
+		#region Event
+
 		/// <summary>Returns the <see cref="T:System.Reflection.EventInfo" /> object representing the specified public event.</summary>
 		/// <param name="name">The string containing the name of an event that is declared or inherited by the current <see cref="T:System.Type" />.</param>
 		/// <returns>The object representing the specified public event that is declared or inherited by the current <see cref="T:System.Type" />,
@@ -721,21 +697,6 @@ namespace TypeExtensions
 		}
 
 #if !NETSTANDARDLESS1_4
-
-		/// <summary>When overridden in a derived class, searches for the constructors defined for the current <see cref="T:System.Type" />, using the specified <see langword="BindingFlags" />.</summary>
-		/// <param name="bindingAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted.-or- Zero, to return <see langword="null" />. </param>
-		/// <returns>
-		/// An array of <see cref="T:System.Reflection.ConstructorInfo" /> objects representing all constructors defined for the current <see cref="T:System.Type" />
-		/// that match the specified binding constraints, including the type initializer if it is defined. Returns an empty array of type <see cref="T:System.Reflection.ConstructorInfo" />
-		/// if no constructors are defined for the current <see cref="T:System.Type" />, if none of the defined constructors match the binding constraints,
-		/// or if the current <see cref="T:System.Type" /> represents a type parameter in the definition of a generic type or generic method.
-		/// </returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static ConstructorInfo[] GetConstructorsEx([NotNull] this Type type, BindingFlags bindingAttr)
-		{
-			return type.TypeInfo().GetConstructors(bindingAttr);
-		}
 
 		/// <summary>When overridden in a derived class, returns the <see cref="T:System.Reflection.EventInfo" /> object representing the specified event, using the specified binding constraints.</summary>
 		/// <param name="name">The string containing the name of an event which is declared or inherited by the current <see cref="T:System.Type" />. </param>
@@ -759,6 +720,27 @@ namespace TypeExtensions
 		{
 			return type.TypeInfo().GetEvents(bindingAttr);
 		}
+
+#endif
+
+		/// <summary>Returns all the public events that are declared or inherited by the current <see cref="T:System.Type" />.</summary>
+		/// <returns>An array of <see cref="T:System.Reflection.EventInfo" /> objects representing all the public events which are declared or inherited by the current <see cref="T:System.Type" />.-or- An empty array of type <see cref="T:System.Reflection.EventInfo" />, if the current <see cref="T:System.Type" /> does not have public events.</returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static EventInfo[] GetEventsEx([NotNull] this Type type)
+		{
+#if NETSTANDARDLESS1_4
+			return type.TypeInfo().DeclaredEvents.ToArray();
+#else
+			return type.TypeInfo().GetEvents();
+#endif
+		}
+
+		#endregion
+
+		#region Field
+
+#if !NETSTANDARDLESS1_4
 
 		/// <summary>Searches for the specified field, using the specified binding constraints.</summary>
 		/// <param name="name">The string containing the name of the data field to get. </param>
@@ -784,19 +766,6 @@ namespace TypeExtensions
 		}
 
 #endif
-
-		/// <summary>Returns all the public events that are declared or inherited by the current <see cref="T:System.Type" />.</summary>
-		/// <returns>An array of <see cref="T:System.Reflection.EventInfo" /> objects representing all the public events which are declared or inherited by the current <see cref="T:System.Type" />.-or- An empty array of type <see cref="T:System.Reflection.EventInfo" />, if the current <see cref="T:System.Type" /> does not have public events.</returns>
-		[Pure]
-		[MethodImpl(AggressiveInlining)]
-		public static EventInfo[] GetEventsEx([NotNull] this Type type)
-		{
-#if NETSTANDARDLESS1_4
-			return type.TypeInfo().DeclaredEvents.ToArray();
-#else
-			return type.TypeInfo().GetEvents();
-#endif
-		}
 
 		/// <summary>Searches for the public field with the specified name.</summary>
 		/// <param name="type">A <see cref="T:System.Type" /> object.</param>
@@ -829,84 +798,435 @@ namespace TypeExtensions
 #endif
 		}
 
+		#endregion
+
+		#region Member
+
+#if !NETSTANDARDLESS1_4
+
+		/// <summary>Searches for the specified members, using the specified binding constraints.</summary>
+		/// <param name="name">The string containing the name of the members to get. </param>
+		/// <param name="bindingAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted.-or- Zero, to return an empty array. </param>
+		/// <returns>An array of <see cref="T:System.Reflection.MemberInfo" /> objects representing the public members with the specified name, if found; otherwise, an empty array.</returns>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="name" /> is <see langword="null" />. </exception>
+		[Pure, CanBeNull]
+		[MethodImpl(AggressiveInlining)]
+		public static MemberInfo[] GetMemberEx([NotNull] this Type type, string name, BindingFlags bindingAttr)
+		{
+			return type.TypeInfo().GetMember(name, bindingAttr);
+		}
+
+		/// <summary>Searches for the specified members of the specified member type, using the specified binding constraints.</summary>
+		/// <param name="name">The string containing the name of the members to get. </param>
+		/// <param name="memberTypes">The value to search for. </param>
+		/// <param name="bindingAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted.-or- Zero, to return an empty array. </param>
+		/// <returns>An array of <see cref="T:System.Reflection.MemberInfo" /> objects representing the public members with the specified name, if found; otherwise, an empty array.</returns>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="name" /> is <see langword="null" />. </exception>
+		/// <exception cref="T:System.NotSupportedException">A derived class must provide an implementation. </exception>
+		[Pure, CanBeNull]
+		[MethodImpl(AggressiveInlining)]
+		public static MemberInfo[] GetMemberEx([NotNull] this Type type, string name, MemberTypes memberTypes, BindingFlags bindingAttr)
+		{
+			return type.TypeInfo().GetMember(name, memberTypes, bindingAttr);
+		}
+
+		/// <summary>When overridden in a derived class, searches for the members defined for the current <see cref="T:System.Type" />, using the specified binding constraints.</summary>
+		/// <param name="bindingAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted.-or- Zero (<see cref="F:System.Reflection.BindingFlags.Default" />), to return an empty array. </param>
+		/// <returns>An array of <see cref="T:System.Reflection.MemberInfo" /> objects representing all members defined for the current <see cref="T:System.Type" /> that match the specified binding constraints.-or- An empty array of type <see cref="T:System.Reflection.MemberInfo" />, if no members are defined for the current <see cref="T:System.Type" />, or if none of the defined members match the binding constraints.</returns>
+		[Pure, CanBeNull]
+		[MethodImpl(AggressiveInlining)]
+		public static MemberInfo[] GetMembersEx([NotNull] this Type type, BindingFlags bindingAttr)
+		{
+			return type.TypeInfo().GetMembers(bindingAttr);
+		}
+
+#endif
+
+		/// <summary>Searches for the public members with the specified name.</summary>
+		/// <param name="name">The string containing the name of the public members to get. </param>
+		/// <returns>An array of <see cref="T:System.Reflection.MemberInfo" /> objects representing the public members with the specified name, if found; otherwise, an empty array.</returns>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="name" /> is <see langword="null" />. </exception>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static MemberInfo[] GetMemberEx([NotNull] this Type type, string name)
+		{
+#if NETSTANDARDLESS1_4
+			return type.GetTypeInfo().DeclaredMembers.Where(m => m.Name == name).ToArray();
+#else
+			return type.TypeInfo().GetMember(name);
+#endif
+		}
+
+		/// <summary>Returns all the public members of the current <see cref="T:System.Type" />.</summary>
+		/// <returns>An array of <see cref="T:System.Reflection.MemberInfo" /> objects representing all the public members of the current <see cref="T:System.Type" />.-or- An empty array of type <see cref="T:System.Reflection.MemberInfo" />, if the current <see cref="T:System.Type" /> does not have public members.</returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static MemberInfo[] GetMembersEx([NotNull] this Type type)
+		{
+#if NETSTANDARDLESS1_4
+			return type.GetTypeInfo().DeclaredMembers.ToArray();
+#else
+			return type.TypeInfo().GetMembers();
+#endif
+		}
+
+		#endregion
+
+		#region Method
+
+#if !NETSTANDARDLESS1_4
+
+		/// <summary>Searches for the specified method, using the specified binding constraints.</summary>
+		/// <param name="name">The string containing the name of the method to get. </param>
+		/// <param name="bindingAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted.-or- Zero, to return <see langword="null" />. </param>
+		/// <returns>An object representing the method that matches the specified requirements, if found; otherwise, <see langword="null" />.</returns>
+		/// <exception cref="T:System.Reflection.AmbiguousMatchException">More than one method is found with the specified name and matching the specified binding constraints. </exception>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="name" /> is <see langword="null" />. </exception>
+		[Pure, CanBeNull]
+		[MethodImpl(AggressiveInlining)]
+		public static MemberInfo GetMethodEx([NotNull] this Type type, string name, BindingFlags bindingAttr)
+		{
+			return type.TypeInfo().GetMethod(name, bindingAttr);
+		}
+
+#endif
+
+		/// <summary>Searches for the public method with the specified name.</summary>
+		/// <param name="name">The string containing the name of the public method to get. </param>
+		/// <returns>An object that represents the public method with the specified name, if found; otherwise, <see langword="null" />.</returns>
+		/// <exception cref="T:System.Reflection.AmbiguousMatchException">More than one method is found with the specified name. </exception>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="name" /> is <see langword="null" />. </exception>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static MethodInfo GetMethodEx([NotNull] this Type type, string name)
+		{
+#if NETSTANDARDLESS1_4
+			return type.GetTypeInfo().GetDeclaredMethod(name);
+#else
+			return type.TypeInfo().GetMethod(name);
+#endif
+		}
+
+#if !NETSTANDARDLESS1_4
+
+		/// <summary>Searches for the specified public method whose parameters match the specified argument types.</summary>
+		/// <param name="name">The string containing the name of the public method to get. </param>
+		/// <param name="types">An array of <see cref="T:System.Type" /> objects representing the number, order, and type of the parameters for the method to get.-or- An empty array of <see cref="T:System.Type" /> objects (as provided by the <see cref="F:System.Type.EmptyTypes" /> field) to get a method that takes no parameters. </param>
+		/// <returns>An object representing the public method whose parameters match the specified argument types, if found; otherwise, <see langword="null" />.</returns>
+		/// <exception cref="T:System.Reflection.AmbiguousMatchException">More than one method is found with the specified name and specified parameters. </exception>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="name" /> is <see langword="null" />.-or-
+		/// <paramref name="types" /> is <see langword="null" />.-or- One of the elements in <paramref name="types" /> is <see langword="null" />. </exception>
+		/// <exception cref="T:System.ArgumentException">
+		/// <paramref name="types" /> is multidimensional. </exception>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static MethodInfo GetMethodEx([NotNull] this Type type, string name, Type[] types)
+		{
+			return type.TypeInfo().GetMethod(name, types);
+		}
+
+		/// <summary>Searches for the specified public method whose parameters match the specified argument types and modifiers.</summary>
+		/// <param name="name">The string containing the name of the public method to get. </param>
+		/// <param name="types">An array of <see cref="T:System.Type" /> objects representing the number, order, and type of the parameters for the method to get.-or- An empty array of <see cref="T:System.Type" /> objects (as provided by the <see cref="F:System.Type.EmptyTypes" /> field) to get a method that takes no parameters. </param>
+		/// <param name="modifiers">An array of <see cref="T:System.Reflection.ParameterModifier" /> objects representing the attributes associated with the corresponding element in the <paramref name="types" /> array. To be only used when calling through COM interop, and only parameters that are passed by reference are handled. The default binder does not process this parameter.</param>
+		/// <returns>An object representing the public method that matches the specified requirements, if found; otherwise, <see langword="null" />.</returns>
+		/// <exception cref="T:System.Reflection.AmbiguousMatchException">More than one method is found with the specified name and specified parameters. </exception>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="name" /> is <see langword="null" />.-or-
+		/// <paramref name="types" /> is <see langword="null" />.-or- One of the elements in <paramref name="types" /> is <see langword="null" />. </exception>
+		/// <exception cref="T:System.ArgumentException">
+		/// <paramref name="types" /> is multidimensional.-or-
+		/// <paramref name="modifiers" /> is multidimensional.</exception>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static MethodInfo GetMethodEx([NotNull] this Type type, string name, Type[] types, ParameterModifier[] modifiers)
+		{
+			return type.TypeInfo().GetMethod(name, types, modifiers);
+		}
+
+#endif
+
+#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARDLESS1_6
+
+		/// <summary>Searches for the specified method whose parameters match the specified argument types and modifiers, using the specified binding constraints.</summary>
+		/// <param name="name">The string containing the name of the method to get. </param>
+		/// <param name="bindingAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted.-or- Zero, to return <see langword="null" />. </param>
+		/// <param name="binder">An object that defines a set of properties and enables binding, which can involve selection of an overloaded method, coercion of argument types, and invocation of a member through reflection.-or- A null reference (<see langword="Nothing" /> in Visual Basic), to use the <see cref="P:System.Type.DefaultBinder" />. </param>
+		/// <param name="types">An array of <see cref="T:System.Type" /> objects representing the number, order, and type of the parameters for the method to get.-or- An empty array of <see cref="T:System.Type" /> objects (as provided by the <see cref="F:System.Type.EmptyTypes" /> field) to get a method that takes no parameters. </param>
+		/// <param name="modifiers">An array of <see cref="T:System.Reflection.ParameterModifier" /> objects representing the attributes associated with the corresponding element in the <paramref name="types" /> array. To be only used when calling through COM interop, and only parameters that are passed by reference are handled. The default binder does not process this parameter.</param>
+		/// <returns>An object representing the method that matches the specified requirements, if found; otherwise, <see langword="null" />.</returns>
+		/// <exception cref="T:System.Reflection.AmbiguousMatchException">More than one method is found with the specified name and matching the specified binding constraints. </exception>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="name" /> is <see langword="null" />.-or-
+		/// <paramref name="types" /> is <see langword="null" />.-or- One of the elements in <paramref name="types" /> is <see langword="null" />. </exception>
+		/// <exception cref="T:System.ArgumentException">
+		/// <paramref name="types" /> is multidimensional.-or-
+		/// <paramref name="modifiers" /> is multidimensional.</exception>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static MethodInfo GetMethodEx(
+			[NotNull] this Type type, string name, BindingFlags bindingAttr, Binder binder, Type[] types, ParameterModifier[] modifiers)
+		{
+			return type.TypeInfo().GetMethod(name, bindingAttr, binder, types, modifiers);
+		}
+
+		/// <summary>Searches for the specified method whose parameters match the specified argument types and modifiers, using the specified binding constraints and the specified calling convention.</summary>
+		/// <param name="name">The string containing the name of the method to get. </param>
+		/// <param name="bindingAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted.-or- Zero, to return <see langword="null" />. </param>
+		/// <param name="binder">An object that defines a set of properties and enables binding, which can involve selection of an overloaded method, coercion of argument types, and invocation of a member through reflection.-or- A null reference (<see langword="Nothing" /> in Visual Basic), to use the <see cref="P:System.Type.DefaultBinder" />. </param>
+		/// <param name="callConvention">The object that specifies the set of rules to use regarding the order and layout of arguments, how the return value is passed, what registers are used for arguments, and how the stack is cleaned up. </param>
+		/// <param name="types">An array of <see cref="T:System.Type" /> objects representing the number, order, and type of the parameters for the method to get.-or- An empty array of <see cref="T:System.Type" /> objects (as provided by the <see cref="F:System.Type.EmptyTypes" /> field) to get a method that takes no parameters. </param>
+		/// <param name="modifiers">An array of <see cref="T:System.Reflection.ParameterModifier" /> objects representing the attributes associated with the corresponding element in the <paramref name="types" /> array. To be only used when calling through COM interop, and only parameters that are passed by reference are handled. The default binder does not process this parameter.</param>
+		/// <returns>An object representing the method that matches the specified requirements, if found; otherwise, <see langword="null" />.</returns>
+		/// <exception cref="T:System.Reflection.AmbiguousMatchException">More than one method is found with the specified name and matching the specified binding constraints. </exception>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="name" /> is <see langword="null" />.-or-
+		/// <paramref name="types" /> is <see langword="null" />.-or- One of the elements in <paramref name="types" /> is <see langword="null" />. </exception>
+		/// <exception cref="T:System.ArgumentException">
+		/// <paramref name="types" /> is multidimensional.-or-
+		/// <paramref name="modifiers" /> is multidimensional.</exception>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static MethodInfo GetMethodEx(
+			[NotNull] this Type type, string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers)
+		{
+			return type.TypeInfo().GetMethod(name, bindingAttr, binder, callConvention, types, modifiers);
+		}
+
+#endif
+
+		/// <summary>Returns all the public methods of the current <see cref="T:System.Type" />.</summary>
+		/// <returns>An array of <see cref="T:System.Reflection.MethodInfo" /> objects representing all the public methods defined for the current <see cref="T:System.Type" />.-or- An empty array of type <see cref="T:System.Reflection.MethodInfo" />, if no public methods are defined for the current <see cref="T:System.Type" />.</returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static MethodInfo[] GetMethodsEx([NotNull] this Type type)
+		{
+#if NETSTANDARDLESS1_4
+			return type.GetTypeInfo().DeclaredMethods.ToArray();
+#else
+			return type.TypeInfo().GetMethods();
+#endif
+		}
+
+#if !NETSTANDARDLESS1_4
+
+		/// <summary>When overridden in a derived class, searches for the methods defined for the current <see cref="T:System.Type" />, using the specified binding constraints.</summary>
+		/// <param name="bindingAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted.-or- Zero, to return <see langword="null" />. </param>
+		/// <returns>An array of <see cref="T:System.Reflection.MethodInfo" /> objects representing all methods defined for the current <see cref="T:System.Type" /> that match the specified binding constraints.-or- An empty array of type <see cref="T:System.Reflection.MethodInfo" />, if no methods are defined for the current <see cref="T:System.Type" />, or if none of the defined methods match the binding constraints.</returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static MethodInfo[] GetMethodsEx([NotNull] this Type type, BindingFlags bindingAttr)
+		{
+			return type.TypeInfo().GetMethods(bindingAttr);
+		}
+
+#endif
+
+		#endregion
+
+		#region Nested
+
+		/// <summary>Gets a value indicating whether the current <see cref="T:System.Type" /> object represents a type whose definition is nested inside the definition of another type.</summary>
+		/// <returns>
+		/// <see langword="true" /> if the <see cref="T:System.Type" /> is nested inside another type; otherwise, <see langword="false" />.
+		/// </returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static bool IsNestedEx([NotNull] this Type type)
+		{
+			return type.IsNested;
+		}
+
+		/// <summary>Gets a value indicating whether the <see cref="T:System.Type" /> is nested and visible only within its own assembly.</summary>
+		/// <returns> <see langword="true" /> if the <see cref="T:System.Type" /> is nested and visible only within its own assembly; otherwise, <see langword="false" />.</returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static bool IsNestedAssemblyEx([NotNull] this Type type)
+		{
+			return type.TypeInfo().IsNestedAssembly;
+		}
+
+		/// <summary>Gets a value indicating whether the <see cref="T:System.Type" /> is nested and visible only to classes that belong to both its own family and its own assembly.</summary>
+		/// <returns>
+		/// <see langword="true" /> if the <see cref="T:System.Type" /> is nested and visible only to classes that belong to both its own family and its own assembly; otherwise, <see langword="false" />.
+		/// </returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static bool IsNestedFamANDAssemEx([NotNull] this Type type)
+		{
+			return type.TypeInfo().IsNestedFamANDAssem;
+		}
+
+		/// <summary>Gets a value indicating whether the <see cref="T:System.Type" /> is nested and visible only within its own family.</summary>
+		/// <returns>
+		/// <see langword="true" /> if the <see cref="T:System.Type" /> is nested and visible only within its own family; otherwise, <see langword="false" />.
+		/// </returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static bool IsNestedFamilyEx([NotNull] this Type type)
+		{
+			return type.TypeInfo().IsNestedFamily;
+		}
+
+		/// <summary>Gets a value indicating whether the <see cref="T:System.Type" /> is nested and visible only to classes that belong to either its own family or to its own assembly.</summary>
+		/// <returns>
+		/// <see langword="true" /> if the <see cref="T:System.Type" /> is nested and visible only to classes that belong to its own family or to its own assembly; otherwise, <see langword="false" />.
+		/// </returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static bool IsNestedFamORAssemEx([NotNull] this Type type)
+		{
+			return type.TypeInfo().IsNestedFamORAssem;
+		}
+
+		/// <summary>Gets a value indicating whether the <see cref="T:System.Type" /> is nested and declared private.</summary>
+		/// <returns>
+		/// <see langword="true" /> if the <see cref="T:System.Type" /> is nested and declared private; otherwise, <see langword="false" />.
+		/// </returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static bool IsNestedPrivateEx([NotNull] this Type type)
+		{
+			return type.TypeInfo().IsNestedPrivate;
+		}
+
+		/// <summary>Gets a value indicating whether a class is nested and declared public.</summary>
+		/// <returns><see langword="true" /> if the class is nested and declared public; otherwise, <see langword="false" />.</returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static bool IsNestedPublicEx([NotNull] this Type type)
+		{
+			return type.TypeInfo().IsNestedPublic;
+		}
+
+		/// <summary>Searches for the public nested type with the specified name.</summary>
+		/// <param name="name">The string containing the name of the nested type to get. </param>
+		/// <returns>An object representing the public nested type with the specified name, if found; otherwise, <see langword="null" />.</returns>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="name" /> is <see langword="null" />. </exception>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static Type GetNestedTypeEx([NotNull] this Type type, string name)
+		{
+#if NETSTANDARDLESS1_4
+			return type.GetTypeInfo().DeclaredNestedTypes.FirstOrDefault(t => t.Name == name)?.AsType();
+#else
+			return type.TypeInfo().GetNestedType(name);
+#endif
+		}
+
+#if !NETSTANDARDLESS1_4
+
+		/// <summary>When overridden in a derived class, searches for the specified nested type, using the specified binding constraints.</summary>
+		/// <param name="name">The string containing the name of the nested type to get. </param>
+		/// <param name="bindingAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted.-or- Zero, to return <see langword="null" />. </param>
+		/// <returns>An object representing the nested type that matches the specified requirements, if found; otherwise, <see langword="null" />.</returns>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="name" /> is <see langword="null" />. </exception>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static Type GetNestedTypeEx([NotNull] this Type type, string name, BindingFlags bindingAttr)
+		{
+			return type.TypeInfo().GetNestedType(name, bindingAttr);
+		}
+
+#endif
+
+		/// <summary>Returns the public types nested in the current <see cref="T:System.Type" />.</summary>
+		/// <returns>An array of <see cref="T:System.Type" /> objects representing the public types nested in the current <see cref="T:System.Type" /> (the search is not recursive), or an empty array of type <see cref="T:System.Type" /> if no public types are nested in the current <see cref="T:System.Type" />.</returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static Type[] GetNestedTypesEx([NotNull] this Type type)
+		{
+#if NETSTANDARDLESS1_4
+			return type.GetTypeInfo().DeclaredNestedTypes.Select(t => t.AsType()).ToArray();
+#else
+			return type.TypeInfo().GetNestedTypes();
+#endif
+		}
+
+#if !NETSTANDARDLESS1_4
+
+		/// <summary>When overridden in a derived class, searches for the types nested in the current <see cref="T:System.Type" />, using the specified binding constraints.</summary>
+		/// <param name="bindingAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted.-or- Zero, to return <see langword="null" />. </param>
+		/// <returns>An array of <see cref="T:System.Type" /> objects representing all the types nested in the current <see cref="T:System.Type" /> that match the specified binding constraints (the search is not recursive), or an empty array of type <see cref="T:System.Type" />, if no nested types are found that match the binding constraints.</returns>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static Type[] GetNestedTypesEx([NotNull] this Type type, BindingFlags bindingAttr)
+		{
+			return type.TypeInfo().GetNestedTypes(bindingAttr);
+		}
+
+#endif
+
+		#endregion
+
+		#region Property
+
+		/// <summary>Searches for the public property with the specified name.</summary>
+		/// <param name="type">A <see cref="T:System.Type" /> object.</param>
+		/// <param name="name">The string containing the name of the public property to get. </param>
+		/// <returns>An object representing the public property with the specified name, if found; otherwise, <see langword="null" />.</returns>
+		/// <exception cref="T:System.Reflection.AmbiguousMatchException">More than one property is found with the specified name. See Remarks.</exception>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="name" /> is <see langword="null" />. </exception>
+		[Pure, CanBeNull]
+		[MethodImpl(AggressiveInlining)]
+		public static PropertyInfo? GetPropertyEx([NotNull] this Type type, [NotNull] string name)
+		{
+#if NETSTANDARDLESS1_4
+			return type.GetTypeInfo().GetDeclaredProperty(name);
+#else
+			return type.TypeInfo().GetProperty(name);
+#endif
+		}
+
+#if !NETSTANDARDLESS1_4
+
+		/// <summary>Searches for the specified property, using the specified binding constraints.</summary>
+		/// <param name="name">The string containing the name of the property to get. </param>
+		/// <param name="bindingAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted.-or- Zero, to return <see langword="null" />. </param>
+		/// <returns>An object representing the property that matches the specified requirements, if found; otherwise, <see langword="null" />.</returns>
+		/// <exception cref="T:System.Reflection.AmbiguousMatchException">More than one property is found with the specified name and matching the specified binding constraints. See Remarks.</exception>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="name" /> is <see langword="null" />. </exception>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static PropertyInfo GetPropertyEx([NotNull] this Type type, [NotNull] string name, BindingFlags bindingAttr)
+		{
+			return type.TypeInfo().GetProperty(name, bindingAttr);
+		}
+
+#endif
+
+		/// <summary>Searches for the public property with the specified name and return type.</summary>
+		/// <param name="name">The string containing the name of the public property to get. </param>
+		/// <param name="returnType">The return type of the property. </param>
+		/// <returns>An object representing the public property with the specified name, if found; otherwise, <see langword="null" />.</returns>
+		/// <exception cref="T:System.Reflection.AmbiguousMatchException">More than one property is found with the specified name. </exception>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="name" /> is <see langword="null" />, or <paramref name="returnType" /> is <see langword="null" />. </exception>
+		[Pure]
+		[MethodImpl(AggressiveInlining)]
+		public static PropertyInfo GetPropertyEx([NotNull] this Type type, [NotNull] string name, Type returnType)
+		{
+#if NETSTANDARDLESS1_4
+			return type.GetTypeInfo().DeclaredProperties.FirstOrDefault(p => p.Name == name && p.PropertyType == returnType);
+
+#else
+			return type.TypeInfo().GetProperty(name, returnType);
+#endif
+		}
+
+		#endregion
+
 /*
-		public MemberInfo[] GetMember(string name) => GetMember(name, Type.DefaultLookup);
-		public virtual MemberInfo[] GetMember(string name, BindingFlags bindingAttr) => GetMember(name, MemberTypes.All, bindingAttr);
-		public virtual MemberInfo[] GetMember(string name, MemberTypes type, BindingFlags bindingAttr) { throw new NotSupportedException(SR.NotSupported_SubclassOverride); }
-
-		public MemberInfo[] GetMembers() => GetMembers(Type.DefaultLookup);
-		public abstract MemberInfo[] GetMembers(BindingFlags bindingAttr);
-
-		public MethodInfo GetMethod(string name) => GetMethod(name, Type.DefaultLookup);
-		public MethodInfo GetMethod(string name, BindingFlags bindingAttr)
-		{
-			if (name == null)
-				throw new ArgumentNullException(nameof(name));
-			return GetMethodImpl(name, bindingAttr, null, CallingConventions.Any, null, null);
-		}
-
-		public MethodInfo GetMethod(string name, Type[] types) => GetMethod(name, types, null);
-		public MethodInfo GetMethod(string name, Type[] types, ParameterModifier[] modifiers) => GetMethod(name, Type.DefaultLookup, null, types, modifiers);
-		public MethodInfo GetMethod(string name, BindingFlags bindingAttr, Binder binder, Type[] types, ParameterModifier[] modifiers) => GetMethod(name, bindingAttr, binder, CallingConventions.Any, types, modifiers);
-		public MethodInfo GetMethod(string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers)
-		{
-			if (name == null)
-				throw new ArgumentNullException(nameof(name));
-			if (types == null)
-				throw new ArgumentNullException(nameof(types));
-			for (int i = 0; i < types.Length; i++)
-			{
-				if (types[i] == null)
-					throw new ArgumentNullException(nameof(types));
-			}
-			return GetMethodImpl(name, bindingAttr, binder, callConvention, types, modifiers);
-		}
-
-		public MethodInfo GetMethod(string name, int genericParameterCount, Type[] types) => GetMethod(name, genericParameterCount, types, null);
-		public MethodInfo GetMethod(string name, int genericParameterCount, Type[] types, ParameterModifier[] modifiers) => GetMethod(name, genericParameterCount, Type.DefaultLookup, null, types, modifiers);
-		public MethodInfo GetMethod(string name, int genericParameterCount, BindingFlags bindingAttr, Binder binder, Type[] types, ParameterModifier[] modifiers) => GetMethod(name, genericParameterCount, bindingAttr, binder, CallingConventions.Any, types, modifiers);
-		public MethodInfo GetMethod(string name, int genericParameterCount, BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers)
-		{
-			if (name == null)
-				throw new ArgumentNullException(nameof(name));
-			if (genericParameterCount < 0)
-				throw new ArgumentException(SR.ArgumentOutOfRange_NeedNonNegNum, nameof(genericParameterCount));
-			if (types == null)
-				throw new ArgumentNullException(nameof(types));
-			for (int i = 0; i < types.Length; i++)
-			{
-				if (types[i] == null)
-					throw new ArgumentNullException(nameof(types));
-			}
-			return GetMethodImpl(name, genericParameterCount, bindingAttr, binder, callConvention, types, modifiers);
-		}
-
-		public MethodInfo[] GetMethods() => GetMethods(Type.DefaultLookup);
-		public abstract MethodInfo[] GetMethods(BindingFlags bindingAttr);
-
-		public Type GetNestedType(string name) => GetNestedType(name, Type.DefaultLookup);
-		public abstract Type GetNestedType(string name, BindingFlags bindingAttr);
-
-		public Type[] GetNestedTypes() => GetNestedTypes(Type.DefaultLookup);
-		public abstract Type[] GetNestedTypes(BindingFlags bindingAttr);
-
-		public PropertyInfo GetProperty(string name) => GetProperty(name, Type.DefaultLookup);
-		public PropertyInfo GetProperty(string name, BindingFlags bindingAttr)
-		{
-			if (name == null)
-				throw new ArgumentNullException(nameof(name));
-			return GetPropertyImpl(name, bindingAttr, null, null, null, null);
-		}
-
-		public PropertyInfo GetProperty(string name, Type returnType)
-		{
-			if (name == null)
-				throw new ArgumentNullException(nameof(name));
-			if (returnType == null)
-				throw new ArgumentNullException(nameof(returnType));
-			return GetPropertyImpl(name, Type.DefaultLookup, null, returnType, null, null);
-		}
-
 		public PropertyInfo GetProperty(string name, Type[] types) => GetProperty(name, null, types);
 		public PropertyInfo GetProperty(string name, Type returnType, Type[] types) => GetProperty(name, returnType, types, null);
 		public PropertyInfo GetProperty(string name, Type returnType, Type[] types, ParameterModifier[] modifiers) => GetProperty(name, Type.DefaultLookup, null, returnType, types, modifiers);
@@ -1193,24 +1513,6 @@ namespace TypeExtensions
 			return type.TypeInfo().GetRuntimeInterfaceMap(interfaceType);
 #else
 			return type.GetInterfaceMap(interfaceType);
-#endif
-		}
-
-		/// <summary>Searches for the public property with the specified name.</summary>
-		/// <param name="type">A <see cref="T:System.Type" /> object.</param>
-		/// <param name="name">The string containing the name of the public property to get. </param>
-		/// <returns>An object representing the public property with the specified name, if found; otherwise, <see langword="null" />.</returns>
-		/// <exception cref="T:System.Reflection.AmbiguousMatchException">More than one property is found with the specified name. See Remarks.</exception>
-		/// <exception cref="T:System.ArgumentNullException">
-		/// <paramref name="name" /> is <see langword="null" />. </exception>
-		[Pure, CanBeNull]
-		[MethodImpl(AggressiveInlining)]
-		public static PropertyInfo? GetPropertyEx([NotNull] this Type type, [NotNull] string name)
-		{
-#if NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4
-			return type.GetTypeInfo().GetDeclaredProperty(name);
-#else
-			return type.TypeInfo().GetProperty(name);
 #endif
 		}
 
