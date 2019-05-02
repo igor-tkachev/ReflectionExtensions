@@ -2,7 +2,7 @@
 
 using NUnit.Framework;
 
-namespace TypeExtensions.Tests
+namespace ReflectionExtensions.Tests
 {
 	using Metadata;
 

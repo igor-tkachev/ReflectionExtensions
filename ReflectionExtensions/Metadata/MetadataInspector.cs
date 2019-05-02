@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Microsoft.Win32;
 #endif
 
-namespace TypeExtensions.Metadata
+namespace ReflectionExtensions.Metadata
 {
 	public static class MetadataInspector
 	{

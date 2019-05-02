@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TypeExtensions.Metadata
+namespace ReflectionExtensions.Metadata
 {
 	public class InstalledFrameworkInfo
 	{

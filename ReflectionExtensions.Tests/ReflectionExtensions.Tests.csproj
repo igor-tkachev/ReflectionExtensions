@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<Import Project="..\Build\TypeExtensions.Default.props" />
+	<Import Project="..\Build\ReflectionExtensions.Default.props" />
 
 	<PropertyGroup>
 		<TargetFrameworks>net472;net45;net40;net35;net30;net20;netcoreapp1.0;netcoreapp1.1;netcoreapp2.0;netcoreapp2.1;netcoreapp2.2;netstandard1.4;netstandard1.5;netstandard1.6;netstandard2.0</TargetFrameworks>
@@ -12,6 +12,6 @@
 		<PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
 		<PackageReference Include="Portable.System.ValueTuple" Version="1.0.0" />
 
-		<ProjectReference Include="..\TypeExtensions\TypeExtensions.csproj" />
+		<ProjectReference Include="..\ReflectionExtensions\ReflectionExtensions.csproj" />
 	</ItemGroup>
 </Project>
