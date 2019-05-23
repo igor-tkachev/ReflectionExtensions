@@ -5,9 +5,18 @@
 		<TargetFramework>$(TargetFramework)</TargetFramework>
 		<IsPackable>true</IsPackable>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<DefineConstants>$(DefineConstants);PUBLIC_API1</DefineConstants>
+		<Authors>Igor Tkachev</Authors>
+		<SignAssembly>True</SignAssembly>
+		<DelaySign>False</DelaySign>
+		<AssemblyOriginatorKeyFile>..\Build\ReflectionExtensions.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netcoreapp')) OR '$(TargetFramework)'=='netstandard1.3' OR '$(TargetFramework)'=='netstandard1.4' OR '$(TargetFramework)'=='netstandard1.5' OR '$(TargetFramework)'=='netstandard1.6' OR $(TargetFramework.StartsWith('netstandard2')) ">
 		<PackageReference Include="Microsoft.Win32.Registry" Version="4.5.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)'=='netcoreapp1.0' OR '$(TargetFramework)'=='netcoreapp1.1' OR '$(TargetFramework)'=='netstandard1.5' OR '$(TargetFramework)'=='netstandard1.6' ">
+		<PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
 	</ItemGroup>
 </Project>

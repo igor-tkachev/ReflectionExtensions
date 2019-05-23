@@ -115,6 +115,20 @@ namespace System.Linq
 
 			return Iterator();
 		}
+
+		/// <summary>Projects each element of a sequence into a new form.</summary>
+		/// <param name="source">A sequence of values to invoke a transform function on.</param>
+		/// <param name="selector">A transform function to apply to each element.</param>
+		/// <typeparam name="TSource">The type of the elements of <paramref name="source" />.</typeparam>
+		/// <typeparam name="TResult">The type of the value returned by <paramref name="selector" />.</typeparam>
+		/// <returns>An <see cref="T:System.Collections.Generic.IEnumerable`1" /> whose elements are the result of invoking the transform function on each element of <paramref name="source" />.</returns>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="source" /> or <paramref name="selector" /> is <see langword="null" />.</exception>
+		public static IEnumerable<TResult> Select<TSource,TResult>(this IEnumerable<TSource> source, Func<TSource,TResult> selector)
+		{
+			foreach (var item in source)
+				yield return selector(item);
+		}
 	}
 }
 

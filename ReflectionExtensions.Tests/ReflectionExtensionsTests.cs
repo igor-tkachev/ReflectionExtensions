@@ -260,7 +260,7 @@ namespace ReflectionExtensions.Tests
 		[Test]
 		public void TypeInitializerExTest()
 		{
-			var type = GetType().TypeInitializerEx();
+			_ = GetType().TypeInitializerEx();
 		}
 	}
 }

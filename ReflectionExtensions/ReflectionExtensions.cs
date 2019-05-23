@@ -5,7 +5,7 @@
 #define NETSTANDARDLESS1_6
 #endif
 
-#nullable disable
+//#nullable disable
 
 using System;
 using System.Globalization;
@@ -49,7 +49,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region Common
+		#region Type.Common
 
 		/// <summary>Gets a <see cref="T:System.Reflection.MemberTypes" /> value indicating that this member is a type or a nested type.</summary>
 		/// <returns>A <see cref="T:System.Reflection.MemberTypes" /> value indicating that this member is a type or a nested type.</returns>
@@ -240,7 +240,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region Type
+		#region Type.Type
 
 		/// <summary>Gets the type that declares the current nested type or generic type parameter.</summary>
 		/// <returns>A <see cref="T:System.Type" /> object representing the enclosing type, if the current type is a nested type; or the generic type definition, if the current type is a type parameter of a generic type; or the type that declares the generic method, if the current type is a type parameter of a generic method; otherwise, <see langword="null" />.</returns>
@@ -253,7 +253,7 @@ namespace ReflectionExtensions
 		/// <summary>Gets the class object that was used to obtain this member. </summary>
 		/// <returns>The <see langword="Type" /> object through which this <see cref="T:System.Type" /> object was obtained. </returns>
 		[MethodImpl(AggressiveInlining)]
-		public static Type ReflectedTypeEx(this Type type)
+		public static Type? ReflectedTypeEx(this Type type)
 		{
 #if NETSTANDARDLESS1_6 || NETCOREAPP1_0 || NETCOREAPP1_1
 			return null;
@@ -265,7 +265,7 @@ namespace ReflectionExtensions
 		/// <summary>Indicates the type provided by the common language runtime that represents this type.</summary>
 		/// <returns>The underlying system type for the <see cref="T:System.Type" />.</returns>
 		[MethodImpl(AggressiveInlining)]
-		public static Type UnderlyingSystemTypeEx(this Type type)
+		public static Type? UnderlyingSystemTypeEx(this Type type)
 		{
 #if NETSTANDARDLESS1_4
 			return null;
@@ -276,7 +276,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region Is Flags
+		#region Type.IsFlags
 
 		/// <summary>Gets a value that indicates whether the type is an array.</summary>
 		/// <returns><see langword="true" /> if the current type is an array; otherwise, <see langword="false" />.</returns>
@@ -429,7 +429,7 @@ namespace ReflectionExtensions
 		[MethodImpl(AggressiveInlining)]
 		public static bool IsCOMObjectEx(this Type type)
 		{
-#if NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4
+#if NETSTANDARDLESS1_4
 			return false;
 #else
 			return type.TypeInfo().IsCOMObject;
@@ -474,7 +474,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region Array
+		#region Type.Array
 
 		/// <summary>Gets a value indicating whether the current <see cref="T:System.Type" /> encompasses or refers to another type; that is, whether the current <see cref="T:System.Type" /> is an array, a pointer, or is passed by reference.</summary>
 		/// <returns>
@@ -505,7 +505,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region Generic
+		#region Type.Generic
 
 		/// <summary>Gets a value indicating whether the current <see cref="T:System.Type" /> represents a type parameter in the definition of a generic type or method.</summary>
 		/// <returns>
@@ -514,28 +514,6 @@ namespace ReflectionExtensions
 		public static bool IsGenericParameterEx(this Type type)
 		{
 			return type.TypeInfo().IsGenericParameter;
-		}
-
-		[MethodImpl(AggressiveInlining)]
-		public static bool IsGenericTypeParameterEx(this Type type)
-		{
-#if NET20 || NET30 || NET35 || NET40 || NET45 || NET451 || NET452 || NET46 || NET461 || NET462  || NET47 || NET471 || NET472 || NETCOREAPP1_0 || NETCOREAPP1_1 || NETCOREAPP2_0 || NETSTANDARDLESS1_6 || NETSTANDARD2_0
-
-			return type.IsGenericParameter && type.DeclaringMethodEx() == null;
-#else
-			return type.TypeInfo().IsGenericTypeParameter;
-#endif
-		}
-
-		[MethodImpl(AggressiveInlining)]
-		public static bool IsGenericMethodParameterEx(this Type type)
-		{
-#if NET20 || NET30 || NET35 || NET40 || NET45 || NET451 || NET452 || NET46 || NET461 || NET462  || NET47 || NET471 || NET472 || NETCOREAPP1_0 || NETCOREAPP1_1 || NETCOREAPP2_0 || NETSTANDARDLESS1_6 || NETSTANDARD2_0
-
-			return type.IsGenericParameter && type.DeclaringMethodEx() != null;
-#else
-			return type.TypeInfo().IsGenericMethodParameter;
-#endif
 		}
 
 		/// <summary>Gets a value indicating whether the current type is a generic type.</summary>
@@ -570,7 +548,7 @@ namespace ReflectionExtensions
 		public static Type[] GenericTypeArgumentsEx(this Type type)
 		{
 #if NET20 || NET30 || NET35 || NET40
-			return (type.IsGenericType && !type.IsGenericTypeDefinition) ? type.GetGenericArguments() : new Type[0];
+			return type.IsGenericType && !type.IsGenericTypeDefinition ? type.GetGenericArguments() : new Type[0];
 #else
 			return type.GenericTypeArguments;
 #endif
@@ -625,7 +603,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region Constructor
+		#region Type.Constructor
 
 		/// <summary>Gets the initializer for the type.</summary>
 		/// <returns>An object that contains the name of the class constructor for the <see cref="T:System.Type" />.</returns>
@@ -741,7 +719,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region Event
+		#region Type.Event
 
 		/// <summary>Returns the <see cref="T:System.Reflection.EventInfo" /> object representing the specified public event.</summary>
 		/// <param name="type">A <see cref="T:System.Type" /> object.</param>
@@ -801,7 +779,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region Field
+		#region Type.Field
 
 #if !NETSTANDARDLESS1_4
 
@@ -861,7 +839,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region Member
+		#region Type.Member
 
 #if !NETSTANDARDLESS1_4
 
@@ -950,7 +928,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region Method
+		#region Type.Method
 
 #if !NETSTANDARDLESS1_4
 
@@ -1104,7 +1082,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region Nested
+		#region Type.Nested
 
 		/// <summary>Gets a value indicating whether the current <see cref="T:System.Type" /> object represents a type whose definition is nested inside the definition of another type.</summary>
 		/// <returns>
@@ -1179,7 +1157,7 @@ namespace ReflectionExtensions
 		/// <exception cref="T:System.ArgumentNullException">
 		/// <paramref name="name" /> is <see langword="null" />. </exception>
 		[MethodImpl(AggressiveInlining)]
-		public static Type GetNestedTypeEx(this Type type, string name)
+		public static Type? GetNestedTypeEx(this Type type, string name)
 		{
 #if NETSTANDARDLESS1_4
 			return type.GetTypeInfo().DeclaredNestedTypes.FirstOrDefault(t => t.Name == name)?.AsType();
@@ -1233,7 +1211,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region Property
+		#region Type.Property
 
 		/// <summary>Searches for the public property with the specified name.</summary>
 		/// <param name="type">A <see cref="T:System.Type" /> object.</param>
@@ -1415,7 +1393,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region InvokeMember
+		#region Type.InvokeMember
 
 		[MethodImpl(AggressiveInlining)]
 		public static object InvokeMethodEx(this Type type, string methodName, object target, params object[] parameters)
@@ -1618,7 +1596,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region Interface
+		#region Type.Interface
 
 		/// <summary>Gets a value indicating whether the <see cref="T:System.Type" /> is an interface; that is, not a class or a value type.</summary>
 		/// <returns><see langword="true" /> if the <see cref="T:System.Type" /> is an interface; otherwise, <see langword="false" />.</returns>
@@ -1681,7 +1659,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region Enum
+		#region Type.Enum
 
 		/// <summary>Gets a value indicating whether the type has a name that requires special handling.</summary>
 		/// <returns><see langword="true" /> if the type has a name that requires special handling; otherwise, <see langword="false" />.</returns>
@@ -1713,7 +1691,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region Make
+		#region Type.Make
 
 		/// <summary>Substitutes the elements of an array of types for the type parameters of the current generic type definition and returns a <see cref="T:System.Type" /> object representing the resulting constructed type.</summary>
 		/// <param name="type">A <see cref="T:System.Type" /> object.</param>
@@ -1778,7 +1756,7 @@ namespace ReflectionExtensions
 
 		#endregion
 
-		#region GetCustomAttribute
+		#region Type/MemberInfo.GetCustomAttribute
 
 #if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARDLESS1_6
 
@@ -2008,6 +1986,211 @@ namespace ReflectionExtensions
 		{
 			return element.GetCustomAttributes(attributeType, inherit).Cast<Attribute>().ToArray();
 		}
+
+		#endregion
+
+		#region MemberInfo
+
+		/// <summary>Determines whether any custom attributes are applied to a member of a type. Parameters specify the member, and the type of the custom attribute to search for.</summary>
+		/// <param name="element">An object derived from the <see cref="T:System.Reflection.MemberInfo" /> class that describes a constructor, event, field, method, type, or property member of a class.</param>
+		/// <param name="attributeType">The type, or a base type, of the custom attribute to search for.</param>
+		/// <returns>
+		/// <see langword="true" /> if a custom attribute of type <paramref name="attributeType" /> is applied to <paramref name="element" />; otherwise, <see langword="false" />.</returns>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="element" /> or <paramref name="attributeType" /> is <see langword="null" />.</exception>
+		/// <exception cref="T:System.ArgumentException">
+		/// <paramref name="attributeType" /> is not derived from <see cref="T:System.Attribute" />.</exception>
+		/// <exception cref="T:System.NotSupportedException">
+		/// <paramref name="element" /> is not a constructor, method, property, event, type, or field.</exception>
+		[MethodImpl(AggressiveInlining)]
+		public static bool IsDefinedEx(this MemberInfo element, Type attributeType)
+		{
+#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARDLESS1_6
+			return element.IsDefined(attributeType);
+#else
+			return Attribute.IsDefined(element, attributeType);
+#endif
+		}
+
+		/// <summary>Determines whether any custom attributes are applied to a member of a type. Parameters specify the member, the type of the custom attribute to search for, and whether to search ancestors of the member.</summary>
+		/// <param name="element">An object derived from the <see cref="T:System.Reflection.MemberInfo" /> class that describes a constructor, event, field, method, type, or property member of a class.</param>
+		/// <param name="attributeType">The type, or a base type, of the custom attribute to search for.</param>
+		/// <param name="inherit">If <see langword="true" />, specifies to also search the ancestors of <paramref name="element" /> for custom attributes.</param>
+		/// <returns>
+		/// <see langword="true" /> if a custom attribute of type <paramref name="attributeType" /> is applied to <paramref name="element" />; otherwise, <see langword="false" />.</returns>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="element" /> or <paramref name="attributeType" /> is <see langword="null" />.</exception>
+		/// <exception cref="T:System.ArgumentException">
+		/// <paramref name="attributeType" /> is not derived from <see cref="T:System.Attribute" />.</exception>
+		/// <exception cref="T:System.NotSupportedException">
+		/// <paramref name="element" /> is not a constructor, method, property, event, type, or field.</exception>
+		[MethodImpl(AggressiveInlining)]
+		public static bool IsDefinedEx(this MemberInfo element, Type attributeType, bool inherit)
+		{
+#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARDLESS1_6
+			return element.IsDefined(attributeType, inherit);
+#else
+			return Attribute.IsDefined(element, attributeType, inherit);
+#endif
+		}
+
+		#endregion
+
+		#region PropertyInfo
+
+		/// <summary>When overridden in a derived class, returns the public or non-public <see langword="get" /> accessor for this property.</summary>
+		/// <param name="propertyInfo"></param>
+		/// <param name="nonPublic">Indicates whether a non-public <see langword="get" /> accessor should be returned. <see langword="true" /> if a non-public accessor is to be returned; otherwise, <see langword="false" />.</param>
+		/// <returns>A <see langword="MethodInfo" /> object representing the <see langword="get" /> accessor for this property, if <paramref name="nonPublic" /> is <see langword="true" />. Returns <see langword="null" /> if <paramref name="nonPublic" /> is <see langword="false" /> and the <see langword="get" /> accessor is non-public, or if <paramref name="nonPublic" /> is <see langword="true" /> but no <see langword="get" /> accessors exist.</returns>
+		/// <exception cref="T:System.Security.SecurityException">The requested method is non-public and the caller does not have <see cref="T:System.Security.Permissions.ReflectionPermission" /> to reflect on this non-public method.</exception>
+		[MethodImpl(AggressiveInlining)]
+		public static MethodInfo GetGetMethodEx(this PropertyInfo propertyInfo, bool nonPublic)
+		{
+#if NETSTANDARDLESS1_4
+			return propertyInfo.GetMethod;
+#else
+			return propertyInfo.GetGetMethod(nonPublic);
+#endif
+		}
+
+		/// <summary>When overridden in a derived class, returns the <see langword="set" /> accessor for this property.</summary>
+		/// <param name="propertyInfo"></param>
+		/// <param name="nonPublic">Indicates whether the accessor should be returned if it is non-public. <see langword="true" /> if a non-public accessor is to be returned; otherwise, <see langword="false" />.</param>
+		/// <returns>This property's <see langword="Set" /> method, or <see langword="null" />, as shown in the following table.
+		///  Value
+		///
+		///  Condition
+		///
+		///  The <see langword="Set" /> method for this property.
+		///
+		///  The <see langword="set" /> accessor is public.
+		///
+		/// -or-
+		///
+		/// <paramref name="nonPublic" /> is <see langword="true" /> and the <see langword="set" /> accessor is non-public.
+		///
+		/// <see langword="null" /><paramref name="nonPublic" /> is <see langword="true" />, but the property is read-only.
+		///
+		/// -or-
+		///
+		/// <paramref name="nonPublic" /> is <see langword="false" /> and the <see langword="set" /> accessor is non-public.
+		///
+		/// -or-
+		///
+		/// There is no <see langword="set" /> accessor.</returns>
+		/// <exception cref="T:System.Security.SecurityException">The requested method is non-public and the caller does not have <see cref="T:System.Security.Permissions.ReflectionPermission" /> to reflect on this non-public method.</exception>
+		[MethodImpl(AggressiveInlining)]
+		public static MethodInfo GetSetMethodEx(this PropertyInfo propertyInfo, bool nonPublic)
+		{
+#if NETSTANDARDLESS1_4
+			return propertyInfo.SetMethod;
+#else
+			return propertyInfo.GetSetMethod(nonPublic);
+#endif
+		}
+
+		#endregion
+
+		#region Extensions
+
+		/// <summary>
+		/// Determines whether the specified types are considered equal.
+		/// </summary>
+		/// <param name="parent">A <see cref="System.Type"/> instance. </param>
+		/// <param name="child">A type possible derived from the <c>parent</c> type</param>
+		/// <returns>True, when an object instance of the type <c>child</c>
+		/// can be used as an object of the type <c>parent</c>; otherwise, false.</returns>
+		/// <remarks>Note that nullable types does not have a parent-child relation to it's underlying type.
+		/// For example, the 'int?' type (nullable int) and the 'int' type
+		/// aren't a parent and it's child.</remarks>
+		public static bool IsSameOrParentOf(this Type parent, Type child)
+		{
+			if (parent == child ||
+				child.IsEnumEx() && Enum.GetUnderlyingType(child) == parent ||
+				child.IsSubclassOfEx(parent))
+			{
+				return true;
+			}
+
+			if (parent.IsGenericTypeDefinitionEx())
+				for (var t = child; t != typeof(object) && t != null; t = t.BaseTypeEx())
+					if (t.IsGenericTypeEx() && t.GetGenericTypeDefinition() == parent)
+						return true;
+
+			if (parent.IsInterfaceEx())
+			{
+				var interfaces = child.GetInterfacesEx();
+
+				foreach (var t in interfaces)
+				{
+					if (parent.IsGenericTypeDefinitionEx())
+					{
+						if (t.IsGenericTypeEx() && t.GetGenericTypeDefinition() == parent)
+							return true;
+					}
+					else if (t == parent)
+						return true;
+				}
+			}
+
+			return false;
+		}
+
+		public static bool IsNullableType(Type type)
+		{
+			return type.IsGenericTypeEx() && type.GetGenericTypeDefinitionEx() == typeof(Nullable<>);
+		}
+
+		/// <summary>
+		/// Returns the underlying type argument of the specified type.
+		/// </summary>
+		/// <param name="type">A <see cref="System.Type"/> instance. </param>
+		/// <returns><list>
+		/// <item>The type argument of the type parameter,
+		/// if the type parameter is a closed generic nullable type.</item>
+		/// <item>The underlying Type if the type parameter is an enum type.</item>
+		/// <item>Otherwise, the type itself.</item>
+		/// </list>
+		/// </returns>
+		public static Type GetUnderlyingType(this Type type)
+		{
+			if (IsNullableType(type))
+				type = Nullable.GetUnderlyingType(type) ?? type;
+
+			if (type.IsEnumEx())
+				type = Enum.GetUnderlyingType(type);
+
+			return type;
+		}
+
+		#endregion
+	}
+
+	public static partial class AssemblyExtensions
+	{
+		#region Assembly
+
+#if !NETSTANDARDLESS1_4
+
+		/// <summary>Loads the contents of an assembly file on the specified path.</summary>
+		/// <param name="path">The fully qualified path of the file to load. </param>
+		/// <returns>The loaded assembly.</returns>
+		/// <exception cref="T:System.ArgumentException">The <paramref name="path" /> argument is not an absolute path. </exception>
+		/// <exception cref="T:System.ArgumentNullException">The <paramref name="path" /> parameter is <see langword="null" />. </exception>
+		/// <exception cref="T:System.IO.FileLoadException">A file that was found could not be loaded. </exception>
+		/// <exception cref="T:System.IO.FileNotFoundException">The <paramref name="path" /> parameter is an empty string ("") or does not exist. </exception>
+		/// <exception cref="T:System.BadImageFormatException">
+		/// <paramref name="path" /> is not a valid assembly. -or-Version 2.0 or later of the common language runtime is currently loaded and <paramref name="path" /> was compiled with a later version.</exception>
+		public static Assembly LoadFileEx(string path)
+		{
+#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARDLESS1_6
+			return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
+#else
+			return Assembly.LoadFile(path);
+#endif
+		}
+
+#endif
 
 		#endregion
 	}
