@@ -71,7 +71,7 @@ namespace ReflectionExtensions.TypeBuilder
 
 		static readonly Dictionary<Type,IDictionary<object,Type>> _builtTypes = new Dictionary<Type,IDictionary<object,Type>>(10);
 
-		public static Type GetType(object hashKey, Type sourceType, ITypeBuilder typeBuilder)
+		public static Type? GetType(object hashKey, Type sourceType, ITypeBuilder typeBuilder)
 		{
 			if (hashKey     == null) throw new ArgumentNullException(nameof(hashKey));
 			if (sourceType  == null) throw new ArgumentNullException(nameof(sourceType));
@@ -122,6 +122,15 @@ namespace ReflectionExtensions.TypeBuilder
 
 		public static Type GetType(Type sourceType)
 		{
+			var t =  GetType(sourceType, true);
+
+			Debug.Assert(t != null, nameof(t) + " != null");
+
+			return t;
+		}
+
+		public static Type? GetType(Type sourceType, bool throwException)
+		{
 			if (sourceType.IsSealedEx())
 				return sourceType;
 
@@ -131,7 +140,12 @@ namespace ReflectionExtensions.TypeBuilder
 			if (!sourceType.IsAbstract && sourceType.IsDefinedEx(typeof(BLToolkitGeneratedAttribute), true))
 				return sourceType;
 
-			return GetType(sourceType, sourceType, new AbstractClassBuilder(sourceType));
+			var t = GetType(sourceType, sourceType, new AbstractClassBuilder(sourceType));
+
+			if (throwException && t == null)
+					throw new TypeBuilderException($"Type '{sourceType}' cannot be created.");
+
+			return t;
 		}
 
 #if NET20 || NET30

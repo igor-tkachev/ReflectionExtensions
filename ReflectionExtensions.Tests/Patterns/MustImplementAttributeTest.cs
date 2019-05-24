@@ -105,11 +105,11 @@ namespace ReflectionExtensions.Tests.Patterns
 			{
 				var duck = DuckTyping.Aggregate<IOptionalInterface>(new TestClass(), new EmptyClass());
 
-				Assert.AreEqual(1, duck?.RequiredMethod());
+				Assert.AreEqual(1, duck.RequiredMethod());
 
 				// Exception here.
 				//
-				duck?.OptionalMethod();
+				duck.OptionalMethod();
 			});
 		}
 
@@ -138,17 +138,17 @@ namespace ReflectionExtensions.Tests.Patterns
 		[Test]
 		public void AsLikeBehaviourTest()
 		{
-			var duck = DuckTyping.Implement<IOtherOptionalInterface>(new TestClass());
+			var duck = DuckTyping.Implement<IOtherOptionalInterface>(new TestClass(), false);
 
 			Assert.IsNotNull(duck);
 
-			duck = DuckTyping.Implement<IOtherOptionalInterface>(new EmptyClass());
+			duck = DuckTyping.Implement<IOtherOptionalInterface>(new EmptyClass(), false);
 			Assert.IsNull(duck);
 
-			duck = DuckTyping.Implement<IOtherOptionalInterface>(new EmptyClass());
+			duck = DuckTyping.Implement<IOtherOptionalInterface>(new EmptyClass(), false);
 			Assert.IsNull(duck);
 
-			duck = DuckTyping.Aggregate<IOtherOptionalInterface>(new EmptyClass(), string.Empty);
+			duck = DuckTyping.Aggregate<IOtherOptionalInterface>(false, new EmptyClass(), string.Empty);
 			Assert.IsNull(duck);
 		}
 	}

@@ -32,29 +32,44 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 		private IDictionary<Type,IAbstractTypeBuilder?>? _interfaceMap;
 		public  IDictionary<Type,IAbstractTypeBuilder?>   InterfaceMap => _interfaceMap ??= new Dictionary<Type,IAbstractTypeBuilder?>();
 
-		public Type?                  CurrentInterface { get; set; }
+		public Type? CurrentInterface { get; set; }
 
 		private MethodBuilderHelper? _methodBuilder;
 		public  MethodBuilderHelper   MethodBuilder
 		{
-			get => _methodBuilder ?? throw new InvalidOperationException();
-			set => _methodBuilder = value;
+			get => _methodBuilder         ?? throw new InvalidOperationException();
+			set => _methodBuilder = value ?? throw new InvalidOperationException();
 		}
 
 		private TypeBuilderHelper? _typeBuilder;
 		public  TypeBuilderHelper   TypeBuilder
 		{
-			get => _typeBuilder ?? throw new InvalidOperationException();
-			set => _typeBuilder = value;
+			get => _typeBuilder         ?? throw new InvalidOperationException();
+			set => _typeBuilder = value ?? throw new InvalidOperationException();
+		}
+
+		private PropertyInfo? _currentProperty;
+		public  PropertyInfo   CurrentProperty
+		{
+			get => _currentProperty         ?? throw new InvalidOperationException();
+			set => _currentProperty = value ?? throw new InvalidOperationException();
+		}
+
+		private LocalBuilder? _returnValue;
+		public  LocalBuilder   ReturnValue
+		{
+			get => _returnValue         ?? throw new InvalidOperationException();
+			set => _returnValue = value ?? throw new InvalidOperationException();
 		}
 
 		[CanBeNull]
 		public T GetItem<T>(string key)
 		{
+#nullable disable
 			return Items.TryGetValue(key, out var value) ? (T)value : default;
+#nullable restore
 		}
 
-		public LocalBuilder? ReturnValue { get; set; }
 		public LocalBuilder? Exception   { get; set; }
 		public Label         ReturnLabel { get; set; }
 
@@ -96,7 +111,6 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		public List<IAbstractTypeBuilder>? TypeBuilders    { get; set; }
 		public MethodInfo?                 CurrentMethod   { get; set; }
-		public PropertyInfo?               CurrentProperty { get; set; }
 
 		#region Internal Methods
 

@@ -4,9 +4,13 @@ using System;
 
 using NUnit.Framework;
 
+// ReSharper disable UnusedMember.Global
+// ReSharper disable InconsistentNaming
+
 namespace ReflectionExtensions.Tests.Patterns
 {
 	using ReflectionExtensions.Patterns;
+	using TypeBuilder;
 
 	[TestFixture]
 	public class DuckTypingTest
@@ -48,16 +52,13 @@ namespace ReflectionExtensions.Tests.Patterns
 				v2 = v1;
 			}
 
-			public int Prop
-			{
-				get { return 22; }
-			}
+			public int Prop => 22;
 
 			public event EventHandler Event;
 
 			public void CallEvent()
 			{
-				Event(this, EventArgs.Empty);
+				Event?.Invoke(this, EventArgs.Empty);
 			}
 		}
 
@@ -70,8 +71,7 @@ namespace ReflectionExtensions.Tests.Patterns
 
 			Assert.AreSame(duck, same);
 
-			int value;
-			duck.Method(33, out value);
+			duck.Method(33, out var value);
 
 			Assert.AreEqual(33, value);
 			Assert.AreEqual(42, duck.Method(40));
@@ -213,25 +213,24 @@ namespace ReflectionExtensions.Tests.Patterns
 		{
 			var o     = new GenericClass<int>();
 			var duck  = DuckTyping.Implement<GenericInterface<int>>(o);
-			var duck2 = DuckTyping.Implement<TestInterface2> (o);
+			var duck2 = DuckTyping.Implement<TestInterface2>       (o);
 
 			Assert.AreEqual(40, duck .Method(40));
 			Assert.AreEqual(40, duck2.Method(40));
 
-			int value;
-			duck2.I2Method (33, out value);
+			duck2.I2Method (33, out var value);
 			Assert.AreEqual(35, value);
 		}
 
 		[Test]
 		public void InvalidArgTest1()
 		{
-			TestInterface? o = null;
-
 			Assert.Throws<ArgumentNullException>(() =>
 			{
-				var duck1 = DuckTyping.Implement<TestInterface>(o);
-				var duck2 = (TestInterface)DuckTyping.Implement(typeof(TestInterface), o);
+				TestInterface? o = null;
+
+				_ = DuckTyping.Implement<TestInterface>(o);
+				_ = (TestInterface?)DuckTyping.Implement(typeof(TestInterface), o);
 			});
 		}
 
@@ -242,9 +241,9 @@ namespace ReflectionExtensions.Tests.Patterns
 		[Test]
 		public void InvalidArgTest2()
 		{
-			Assert.Throws<ArgumentException>(() =>
+			Assert.Throws<TypeBuilderException>(() =>
 			{
-				var duck = (NonPublicInterface)DuckTyping.Implement(typeof(NonPublicInterface), new TestClass());
+				_ = (NonPublicInterface?)DuckTyping.Implement(typeof(NonPublicInterface), new TestClass());
 			});
 		}
 
@@ -253,7 +252,7 @@ namespace ReflectionExtensions.Tests.Patterns
 		{
 			Assert.Throws<ArgumentException>(() =>
 			{
-				var duck = (Child1)DuckTyping.Implement(typeof(Child1), new Child2());
+				_ = (Child1?)DuckTyping.Implement(typeof(Child1), new Child2());
 			});
 		}
 
@@ -262,7 +261,7 @@ namespace ReflectionExtensions.Tests.Patterns
 		{
 			Assert.Throws<ArgumentException>(() =>
 			{
-				var duck = (TestInterface)DuckTyping.Implement(typeof(TestInterface), typeof(TestInterface), new TestClass());
+				_ = (TestInterface?)typeof(TestInterface).Implement(typeof(TestInterface), new TestClass());
 			});
 		}
 

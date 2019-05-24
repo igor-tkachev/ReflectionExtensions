@@ -23,8 +23,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		readonly bool _isObjectHolder;
 
-		public Type PropertyType { get; }
-		public Type InstanceType { get; }
+		public Type? PropertyType { get; }
+		public Type  InstanceType { get; }
 
 		public override bool IsApplied(BuildContext context, List<IAbstractTypeBuilder> builders)
 		{
@@ -32,8 +32,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				base.IsApplied(context, builders) &&
 				context.CurrentProperty != null &&
 				context.CurrentProperty.GetIndexParameters().Length == 0 &&
-				(PropertyType == null ||
-				 PropertyType.IsSameOrParentOf(context.CurrentProperty.PropertyType));
+				(PropertyType == null || PropertyType.IsSameOrParentOf(context.CurrentProperty.PropertyType));
 		}
 
 		protected override Type GetFieldType()
@@ -98,8 +97,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 					}
 					else
 						throw new TypeBuilderException(string.Format(
-							"The method '{0}' of '{1}' has parameter '{2}' wich can't be handled. Please specify attrbutes [Parent] or [PropertyInfo] to get access to them.",
-							mi.Name, mi.DeclaringType.FullName, p.Name));
+							"The method '{0}' of '{1}' has parameter '{2}' which can't be handled. Please specify attrbutes [Parent] or [PropertyInfo] to get access to them.",
+							mi.Name, mi.DeclaringType?.FullName, p.Name));
 				}
 
 				if (InstanceType.IsValueType) emit.call    (mi);

@@ -26,11 +26,7 @@ namespace ReflectionExtensions.Reflection
 		{
 			var type = typeof(T);
 
-			if (type.IsValueTypeEx())
-			{
-				_createInstance = () => default;
-			}
-			else
+			if (!type.IsValueTypeEx())
 			{
 				var ctor = type.IsAbstractEx() ? null : type.GetDefaultConstructor();
 
@@ -164,7 +160,9 @@ namespace ReflectionExtensions.Reflection
 		static T ThrowAbstractException() =>
 			throw new InvalidOperationException($"Cant create an instance of abstract class '{typeof(T).FullName}'.");
 
-		static Func<T> _createInstance;
+#nullable disable
+		static Func<T> _createInstance = () => default;
+#nullable restore
 
 		/// <summary>
 		/// Creates an instance of <see cref="TypeAccessor"/>.

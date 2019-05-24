@@ -1,7 +1,11 @@
-﻿#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
+﻿
 
+using System.Diagnostics;
+#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 using System;
 using System.Collections.Generic;
+
+using JetBrains.Annotations;
 
 namespace ReflectionExtensions.Patterns
 {
@@ -24,7 +28,7 @@ namespace ReflectionExtensions.Patterns
 	{
 		#region Single Duck
 
-		static readonly Dictionary<Type,Dictionary<object,Type>> _duckTypes = new Dictionary<Type,Dictionary<object,Type>>();
+		static readonly Dictionary<Type,Dictionary<object,Type?>> _duckTypes = new Dictionary<Type,Dictionary<object,Type?>>();
 
 		/// <summary>
 		/// Build a proxy type which implements the requested interface by redirecting all calls to the supplied object type.
@@ -32,20 +36,20 @@ namespace ReflectionExtensions.Patterns
 		/// <param name="interfaceType">An interface type to implement.</param>
 		/// <param name="objectType">Any type which expected to have all members of the given interface.</param>
 		/// <returns>The duck object type.</returns>
-		public static Type GetDuckType(Type interfaceType, Type objectType)
+		public static Type? GetDuckType(this Type interfaceType, Type objectType)
 		{
 			if (interfaceType == null)          throw new ArgumentNullException(nameof(interfaceType));
 			if (!interfaceType.IsInterfaceEx()) throw new ArgumentException("'interfaceType' must be an interface.", nameof(interfaceType));
-			if (!interfaceType.IsPublicEx() && !interfaceType.IsNestedPublicEx())
-				throw new ArgumentException("The interface must be public.", nameof(interfaceType));
+			//if (!interfaceType.IsPublicEx() && !interfaceType.IsNestedPublicEx())
+			//	throw new ArgumentException("The interface must be public.", nameof(interfaceType));
 
-			Dictionary<object,Type> types;
+			Dictionary<object,Type?> types;
 
 			lock(_duckTypes)
 				if (!_duckTypes.TryGetValue(interfaceType, out types))
-					_duckTypes.Add(interfaceType, types = new Dictionary<object,Type>());
+					_duckTypes.Add(interfaceType, types = new Dictionary<object,Type?>());
 
-			Type type;
+			Type? type;
 
 			lock (types) if (!types.TryGetValue(objectType, out type))
 			{
@@ -69,8 +73,9 @@ namespace ReflectionExtensions.Patterns
 		/// <param name="baseObjectType">Any type which has all members of the given interface.
 		/// When this parameter is set to null, the object type will be used.</param>
 		/// <param name="obj">An object which type expected to have all members of the given interface.</param>
+		/// <param name="throwException">If true, throws an exception if object can not be created.</param>
 		/// <returns>An object which implements the interface.</returns>
-		public static object? Implement(Type interfaceType, Type? baseObjectType, object obj)
+		public static object? Implement(this Type interfaceType, Type? baseObjectType, object obj, bool throwException)
 		{
 			if (obj == null) throw new ArgumentNullException(nameof(obj));
 
@@ -98,16 +103,53 @@ namespace ReflectionExtensions.Patterns
 			else if (!baseObjectType.IsSameOrParentOf(objType))
 				throw new ArgumentException($"'{objType.FullName}' is not a subtype of '{baseObjectType.FullName}'.", nameof(obj));
 
-			var duckType = GetDuckType(interfaceType, baseObjectType);
+			var duckType = interfaceType.GetDuckType(baseObjectType);
 
 			if (duckType == null)
+			{
+				if (throwException)
+					throw new TypeBuilderException($"Interface '{interfaceType}' cannot be implemented.");
 				return null;
+			}
 
 			var duck = TypeAccessor.GetAccessor(duckType).CreateInstance();
 
 			((DuckType)duck).SetObjects(obj);
 
 			return duck;
+		}
+
+		/// <summary>
+		/// Implements the requested interface for supplied object.
+		/// If the supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <param name="interfaceType">An interface type to implement.</param>
+		/// <param name="baseObjectType">Any type which has all members of the given interface.
+		/// When this parameter is set to null, the object type will be used.</param>
+		/// <param name="obj">An object which type expected to have all members of the given interface.</param>
+		/// <returns>An object which implements the interface.</returns>
+		public static object Implement(this Type interfaceType, Type? baseObjectType, object obj)
+		{
+			var o = interfaceType.Implement(baseObjectType, obj, true);
+
+			Debug.Assert(o != null, nameof(o) + " != null");
+
+			return o;
+		}
+
+		/// <summary>
+		/// Implements the requested interface.
+		/// If the supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <param name="interfaceType">An interface type to implement.</param>
+		/// <param name="obj">An object which type expected to have all members of the given interface.</param>
+		/// <param name="throwException">If true, throws an exception if object can not be created.</param>
+		/// <returns>An object which implements the interface.</returns>
+		public static object? Implement(this Type interfaceType, object obj, bool throwException)
+		{
+			return interfaceType.Implement(null, obj, throwException);
 		}
 
 		/// <summary>
@@ -118,9 +160,33 @@ namespace ReflectionExtensions.Patterns
 		/// <param name="interfaceType">An interface type to implement.</param>
 		/// <param name="obj">An object which type expected to have all members of the given interface.</param>
 		/// <returns>An object which implements the interface.</returns>
-		public static object? Implement(Type interfaceType, object obj)
+		public static object Implement(this Type interfaceType, object obj)
 		{
-			return Implement(interfaceType, null, obj);
+			return interfaceType.Implement(null, obj);
+		}
+
+		/// <summary>
+		/// Implements the requested interface for all supplied objects.
+		/// If any of supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <param name="interfaceType">An interface type to implement.</param>
+		/// <param name="baseObjectType">Any type which has all members of the given interface.
+		/// When this parameter is set to null, the object type will be used.</param>
+		/// <param name="throwException">If true, throws an exception if object can not be created.</param>
+		/// <param name="objects">An object array which types expected to have all members of the given interface.
+		/// All objects may have different types.</param>
+		/// <returns>An array of object which implements the interface.</returns>
+		public static object?[] Implement(this Type interfaceType, Type? baseObjectType, bool throwException, params object[] objects)
+		{
+			if (objects == null) throw new ArgumentNullException(nameof(objects));
+
+			object?[] result = new object[objects.Length];
+
+			for (var i = 0; i < objects.Length; i++)
+				result[i] = interfaceType.Implement(baseObjectType, objects[i], throwException);
+
+			return result;
 		}
 
 		/// <summary>
@@ -134,14 +200,14 @@ namespace ReflectionExtensions.Patterns
 		/// <param name="objects">An object array which types expected to have all members of the given interface.
 		/// All objects may have different types.</param>
 		/// <returns>An array of object which implements the interface.</returns>
-		public static object?[] Implement(Type interfaceType, Type? baseObjectType, params object[] objects)
+		public static object[] Implement(this Type interfaceType, Type? baseObjectType, params object[] objects)
 		{
 			if (objects == null) throw new ArgumentNullException(nameof(objects));
 
-			object?[] result = new object[objects.Length];
+			var result = new object[objects.Length];
 
 			for (var i = 0; i < objects.Length; i++)
-				result[i] = Implement(interfaceType, baseObjectType, objects[i]);
+				result[i] = interfaceType.Implement(baseObjectType, objects[i]);
 
 			return result;
 		}
@@ -154,10 +220,40 @@ namespace ReflectionExtensions.Patterns
 		/// <param name="interfaceType">An interface type to implement.</param>
 		/// <param name="objects">An object array which types expected to have all members of the given interface.
 		/// All objects may have different types.</param>
+		/// <param name="throwException">If true, throws an exception if object can not be created.</param>
 		/// <returns>An array of object which implements the interface.</returns>
-		public static object?[] Implement(Type interfaceType, params object[] objects)
+		public static object?[] Implement(this Type interfaceType, bool throwException, params object[] objects)
 		{
-			return Implement(interfaceType, null, objects);
+			return interfaceType.Implement(null, throwException, objects);
+		}
+
+		/// <summary>
+		/// Implements the requested interface for all supplied objects.
+		/// If any of supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <param name="interfaceType">An interface type to implement.</param>
+		/// <param name="objects">An object array which types expected to have all members of the given interface.
+		/// All objects may have different types.</param>
+		/// <returns>An array of object which implements the interface.</returns>
+		public static object[] Implement(this Type interfaceType, params object[] objects)
+		{
+			return interfaceType.Implement(null, objects);
+		}
+
+		/// <summary>
+		/// Implements the requested interface for supplied object.
+		/// If the supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <typeparam name="TI">An interface type to implement.</typeparam>
+		/// <param name="obj">An object which type expected to have all members of the given interface.</param>
+		/// <param name="throwException">If true, throws an exception if object can not be created.</param>
+		/// <returns>An object which implements the interface.</returns>
+		public static TI? Implement<TI>(object obj, bool throwException)
+			where TI : class
+		{
+			return (TI?)typeof(TI).Implement(null, obj, throwException);
 		}
 
 		/// <summary>
@@ -168,10 +264,10 @@ namespace ReflectionExtensions.Patterns
 		/// <typeparam name="TI">An interface type to implement.</typeparam>
 		/// <param name="obj">An object which type expected to have all members of the given interface.</param>
 		/// <returns>An object which implements the interface.</returns>
-		public static TI? Implement<TI>(object obj)
+		public static TI Implement<TI>(object obj)
 			where TI : class
 		{
-			return (TI?)Implement(typeof(TI), null, obj);
+			return (TI)Implement(typeof(TI), null, obj);
 		}
 
 		/// <summary>
@@ -181,12 +277,53 @@ namespace ReflectionExtensions.Patterns
 		/// </summary>
 		/// <typeparam name="TI">An interface type to implement.</typeparam>
 		/// <typeparam name="T">Any type which has all members of the given interface.</typeparam>
-		/// <param name="obj">An object which type expected to have all members of the given interface.</param>
+		/// <param name="throwException">If true, throws an exception if object can not be created.</param>
+		/// <param name="objects">An object which type expected to have all members of the given interface.</param>
 		/// <returns>An object which implements the interface.</returns>
-		public static TI? Implement<TI,T>(T obj)
+		public static TI? Implement<TI,T>([NotNull] T objects, bool throwException)
 			where TI : class
 		{
-			return (TI?)Implement(typeof(TI), typeof(T), obj);
+			if (objects == null) throw new ArgumentNullException(nameof(objects));
+			return (TI?)typeof(TI).Implement(typeof(T), objects, throwException);
+		}
+
+		/// <summary>
+		/// Implements the requested interface for supplied object.
+		/// If the supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <typeparam name="TI">An interface type to implement.</typeparam>
+		/// <typeparam name="T">Any type which has all members of the given interface.</typeparam>
+		/// <param name="objects">An object which type expected to have all members of the given interface.</param>
+		/// <returns>An object which implements the interface.</returns>
+		public static TI Implement<TI,T>([NotNull] T objects)
+			where TI : class
+		{
+			if (objects == null) throw new ArgumentNullException(nameof(objects));
+			return (TI)Implement(typeof(TI), typeof(T), objects);
+		}
+
+		/// <summary>
+		/// Implements the requested interface for all supplied objects.
+		/// If any of supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <typeparam name="TI">An interface type to implement.</typeparam>
+		/// <param name="objects">An object array which types expected to have all members of the given interface.
+		/// All objects may have different types.</param>
+		/// <param name="throwException">If true, throws an exception if object can not be created.</param>
+		/// <returns>An array of object which implements the interface.</returns>
+		public static TI?[] Implement<TI>(bool throwException, params object[] objects)
+			where TI : class
+		{
+			if (objects == null) throw new ArgumentNullException(nameof(objects));
+
+			TI?[] result = new TI[objects.Length];
+
+			for (var i = 0; i < objects.Length; i++)
+				result[i] = Implement<TI>(objects[i], throwException);
+
+			return result;
 		}
 
 		/// <summary>
@@ -198,12 +335,12 @@ namespace ReflectionExtensions.Patterns
 		/// <param name="objects">An object array which types expected to have all members of the given interface.
 		/// All objects may have different types.</param>
 		/// <returns>An array of object which implements the interface.</returns>
-		public static TI?[] Implement<TI>(params object[] objects)
+		public static TI[] Implement<TI>(params object[] objects)
 			where TI : class
 		{
 			if (objects == null) throw new ArgumentNullException(nameof(objects));
 
-			TI?[] result = new TI[objects.Length];
+			var result = new TI[objects.Length];
 
 			for (var i = 0; i < objects.Length; i++)
 				result[i] = Implement<TI>(objects[i]);
@@ -220,13 +357,37 @@ namespace ReflectionExtensions.Patterns
 		/// <typeparam name="T">Any type which has all members of the given interface.</typeparam>
 		/// <param name="objects">An object array which types expected to have all members of the given interface.
 		/// All objects may have different types.</param>
+		/// <param name="throwException">If true, throws an exception if object can not be created.</param>
 		/// <returns>An array of object which implements the interface.</returns>
-		public static TI?[] Implement<TI,T>(params T[] objects)
+		public static TI?[] Implement<TI,T>(bool throwException, params T[] objects)
 			where TI : class
 		{
 			if (objects == null) throw new ArgumentNullException(nameof(objects));
 
 			TI?[] result = new TI[objects.Length];
+
+			for (var i = 0; i < objects.Length; i++)
+				result[i] = Implement<TI,T>(objects[i], throwException);
+
+			return result;
+		}
+
+		/// <summary>
+		/// Implements the requested interface for all supplied objects.
+		/// If any of supplied object implements the interface, the object itself will be returned.
+		/// Otherwise a convenient duck object will be created.
+		/// </summary>
+		/// <typeparam name="TI">An interface type to implement.</typeparam>
+		/// <typeparam name="T">Any type which has all members of the given interface.</typeparam>
+		/// <param name="objects">An object array which types expected to have all members of the given interface.
+		/// All objects may have different types.</param>
+		/// <returns>An array of object which implements the interface.</returns>
+		public static TI[] Implement<TI,T>(params T[] objects)
+			where TI : class
+		{
+			if (objects == null) throw new ArgumentNullException(nameof(objects));
+
+			var result = new TI[objects.Length];
 
 			for (var i = 0; i < objects.Length; i++)
 				result[i] = Implement<TI,T>(objects[i]);
@@ -246,25 +407,25 @@ namespace ReflectionExtensions.Patterns
 		/// <param name="interfaceType">An interface type to implement.</param>
 		/// <param name="objectTypes">Array of types which expected to have all members of the given interface.</param>
 		/// <returns>The duck object type.</returns>
-		public static Type GetDuckType(Type interfaceType, Type[] objectTypes)
+		public static Type? GetDuckType(this Type interfaceType, Type[] objectTypes)
 		{
 			if (!interfaceType.IsInterface)
 				throw new ArgumentException("'interfaceType' must be an interface.", nameof(interfaceType));
-			if (!interfaceType.IsPublic && !interfaceType.IsNestedPublic)
-				throw new ArgumentException("The interface must be public.", nameof(interfaceType));
+			//if (!interfaceType.IsPublic && !interfaceType.IsNestedPublic)
+			//	throw new ArgumentException("The interface must be public.", nameof(interfaceType));
 
-			Dictionary<object,Type> types;
+			Dictionary<object,Type?> types;
 
 			lock (_duckTypes)
 				if (!_duckTypes.TryGetValue(interfaceType, out types))
-					_duckTypes.Add(interfaceType, types = new Dictionary<object,Type>());
+					_duckTypes.Add(interfaceType, types = new Dictionary<object,Type?>());
 
 			var objects = new object[objectTypes.Length];
 
 			for (var i = 0; i < objectTypes.Length; i++)
 				objects[i] = objectTypes[i];
 
-			Type   type;
+			Type?  type;
 			object key = new CompoundValue(objects);
 
 			lock (types) if (!types.TryGetValue(key, out type))
@@ -287,8 +448,9 @@ namespace ReflectionExtensions.Patterns
 		/// <param name="baseObjectTypes">Array of types which have all members of the given interface.
 		/// When this parameter is set to null, the object type will be used.</param>
 		/// <param name="objects">Array of objects which types expected to have all members of the given interface.</param>
+		/// <param name="throwException">If true, throws an exception if object can not be created.</param>
 		/// <returns>An object which implements the interface.</returns>
-		public static object? Aggregate(Type interfaceType, Type[]? baseObjectTypes,params object[] objects)
+		public static object? Aggregate(this Type interfaceType, Type[]? baseObjectTypes, bool throwException, params object[] objects)
 		{
 			if (objects == null) throw new ArgumentNullException(nameof(objects));
 
@@ -317,7 +479,11 @@ namespace ReflectionExtensions.Patterns
 			var duckType = GetDuckType(interfaceType, baseObjectTypes);
 
 			if (duckType == null)
+			{
+				if (throwException)
+					throw new TypeBuilderException($"Interface '{interfaceType}' cannot be implemented.");
 				return null;
+			}
 
 			var duck = TypeAccessor.GetAccessor(duckType).CreateInstance();
 
@@ -330,11 +496,53 @@ namespace ReflectionExtensions.Patterns
 		/// Implements the requested interface from supplied set of objects.
 		/// </summary>
 		/// <param name="interfaceType">An interface type to implement.</param>
+		/// <param name="baseObjectTypes">Array of types which have all members of the given interface.
+		/// When this parameter is set to null, the object type will be used.</param>
+		/// <param name="objects">Array of objects which types expected to have all members of the given interface.</param>
+		/// <returns>An object which implements the interface.</returns>
+		public static object Aggregate(this Type interfaceType, Type[]? baseObjectTypes, params object[] objects)
+		{
+			var o = interfaceType.Aggregate(baseObjectTypes, true, objects);
+
+			Debug.Assert(o != null, nameof(o) + " != null");
+
+			return o;
+		}
+
+		/// <summary>
+		/// Implements the requested interface from supplied set of objects.
+		/// </summary>
+		/// <param name="interfaceType">An interface type to implement.</param>
+		/// <param name="objects">Array of object which types expected to have of the given interface.</param>
+		/// <param name="throwException">If true, throws an exception if object can not be created.</param>
+		/// <returns>An object which implements the interface.</returns>
+		public static object? Aggregate(Type interfaceType, bool throwException, params object[] objects)
+		{
+			return interfaceType.Aggregate(null, throwException, objects);
+		}
+
+		/// <summary>
+		/// Implements the requested interface from supplied set of objects.
+		/// </summary>
+		/// <param name="interfaceType">An interface type to implement.</param>
 		/// <param name="objects">Array of object which types expected to have of the given interface.</param>
 		/// <returns>An object which implements the interface.</returns>
-		public static object? Aggregate(Type interfaceType,params object[] objects)
+		public static object Aggregate(Type interfaceType, params object[] objects)
 		{
-			return Aggregate(interfaceType, null, objects);
+			return interfaceType.Aggregate(null, objects);
+		}
+
+		/// <summary>
+		/// Implements the requested interface from supplied set of objects.
+		/// </summary>
+		/// <typeparam name="TI">An interface type to implement.</typeparam>
+		/// <param name="objects">Array of object which type expected to have all members of the given interface.</param>
+		/// <param name="throwException">If true, throws an exception if object can not be created.</param>
+		/// <returns>An object which implements the interface.</returns>
+		public static TI? Aggregate<TI>(bool throwException, params object[] objects)
+			where TI : class
+		{
+			return (TI?)Aggregate(typeof(TI), null, throwException, objects);
 		}
 
 		/// <summary>
@@ -343,10 +551,10 @@ namespace ReflectionExtensions.Patterns
 		/// <typeparam name="TI">An interface type to implement.</typeparam>
 		/// <param name="objects">Array of object which type expected to have all members of the given interface.</param>
 		/// <returns>An object which implements the interface.</returns>
-		public static TI? Aggregate<TI>(params object[] objects)
+		public static TI Aggregate<TI>(params object[] objects)
 			where TI : class
 		{
-			return (TI?)Aggregate(typeof(TI), null, objects);
+			return (TI)Aggregate(typeof(TI), null, objects);
 		}
 
 		#endregion
