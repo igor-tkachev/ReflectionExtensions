@@ -8,7 +8,7 @@ using System.Reflection;
 
 using JetBrains.Annotations;
 
-namespace ReflectionExtensions.Emit
+namespace ReflectionExtensions.Reflection.Emit
 {
 	/// <summary>
 	/// A wrapper around the <see cref="MethodBuilder"/> class.

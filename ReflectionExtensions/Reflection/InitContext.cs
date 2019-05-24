@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 //using BLToolkit.Mapping;
 
-namespace ReflectionExtensions
+namespace ReflectionExtensions.Reflection
 {
 	public class InitContext
 	{
@@ -33,6 +33,5 @@ namespace ReflectionExtensions
 			[DebuggerStepThrough] get => !IsSource;
 			[DebuggerStepThrough] set => IsSource = !value;
 		}
-
 	}
 }

@@ -8,7 +8,7 @@ using System.Threading;
 
 using JetBrains.Annotations;
 
-namespace ReflectionExtensions.Emit
+namespace ReflectionExtensions.Reflection.Emit
 {
 	/// <summary>
 	/// A wrapper around the <see cref="AssemblyBuilder"/> and <see cref="ModuleBuilder"/> classes.
@@ -131,7 +131,7 @@ namespace ReflectionExtensions.Emit
 
 		readonly Action<int> _createAssemblyBuilder;
 
-		AssemblyBuilder? _assemblyBuilder;
+		private AssemblyBuilder? _assemblyBuilder;
 		/// <summary>
 		/// Gets AssemblyBuilder.
 		/// </summary>
@@ -172,7 +172,7 @@ namespace ReflectionExtensions.Emit
 		/// <summary>
 		/// Retrieves a cached instance of <see cref="ReflectionExtensions.TypeBuilder.BLToolkitGeneratedAttribute"/> builder.
 		/// </summary>
-		public  CustomAttributeBuilder  BLToolkitAttribute
+		public  CustomAttributeBuilder   BLToolkitAttribute
 		{
 			get
 			{

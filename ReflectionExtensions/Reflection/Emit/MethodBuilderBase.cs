@@ -4,7 +4,7 @@ using System;
 
 using JetBrains.Annotations;
 
-namespace ReflectionExtensions.Emit
+namespace ReflectionExtensions.Reflection.Emit
 {
 	/// <summary>
 	/// Base class for wrappers around methods and constructors.

@@ -2,7 +2,7 @@
 	<Import Project="..\Build\ReflectionExtensions.Default.props" />
 
 	<PropertyGroup>
-		<TargetFrameworks>net472;net45;net40;net35;net30;net20;netcoreapp1.0;netcoreapp1.1;netcoreapp2.0;netcoreapp2.1;netcoreapp2.2</TargetFrameworks>
+		<TargetFrameworks>net45;net40;net35;net30;net20;netcoreapp1.0;netcoreapp2.0</TargetFrameworks>
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 

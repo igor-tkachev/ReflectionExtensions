@@ -5,7 +5,7 @@ using System.Reflection.Emit;
 
 using JetBrains.Annotations;
 
-namespace ReflectionExtensions.Emit
+namespace ReflectionExtensions.Reflection.Emit
 {
 	/// <summary>
 	/// A wrapper around the <see cref="ConstructorBuilder"/> class.

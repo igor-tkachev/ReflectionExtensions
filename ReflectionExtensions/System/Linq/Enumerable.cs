@@ -79,11 +79,23 @@ namespace System.Linq
 #nullable restore
 		}
 
+		[CanBeNull]
+		public static TSource FirstOrDefault<TSource>([NotNull] this IEnumerable<TSource> source, Func<TSource,bool> predicate)
+		{
+			if (source == null) throw new ArgumentNullException(nameof(source));
+
+			foreach (var item in source)
+				if (predicate(item))
+					return item;
+
+#nullable disable
+			return default;
+#nullable restore
+		}
+
 		public static IEnumerable<TResult> Cast<TResult>(this IEnumerable source)
 		{
-			var results = source as IEnumerable<TResult>;
-
-			if (results != null)
+			if (source is IEnumerable<TResult> results)
 				return results;
 
 			if (source == null) throw new ArgumentNullException(nameof(source));
@@ -99,9 +111,7 @@ namespace System.Linq
 
 		public static IEnumerable<TResult> OfType<TResult>(this IEnumerable source)
 		{
-			var results = source as IEnumerable<TResult>;
-
-			if (results != null)
+			if (source is IEnumerable<TResult> results)
 				return results;
 
 			if (source == null) throw new ArgumentNullException(nameof(source));
@@ -109,8 +119,8 @@ namespace System.Linq
 			IEnumerable<TResult> Iterator()
 			{
 				foreach (var item in source)
-					if (item is TResult)
-						yield return (TResult)item;
+					if (item is TResult result)
+						yield return result;
 			}
 
 			return Iterator();
@@ -128,6 +138,31 @@ namespace System.Linq
 		{
 			foreach (var item in source)
 				yield return selector(item);
+		}
+
+
+		/// <summary>Creates a <see cref="T:System.Collections.Generic.Dictionary`2" /> from an <see cref="T:System.Collections.Generic.IEnumerable`1" /> according to specified key selector and element selector functions.</summary>
+		/// <param name="source">An <see cref="T:System.Collections.Generic.IEnumerable`1" /> to create a <see cref="T:System.Collections.Generic.Dictionary`2" /> from.</param>
+		/// <param name="keySelector">A function to extract a key from each element.</param>
+		/// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+		/// <typeparam name="TSource">The type of the elements of <paramref name="source" />.</typeparam>
+		/// <typeparam name="TKey">The type of the key returned by <paramref name="keySelector" />.</typeparam>
+		/// <typeparam name="TElement">The type of the value returned by <paramref name="elementSelector" />.</typeparam>
+		/// <returns>A <see cref="T:System.Collections.Generic.Dictionary`2" /> that contains values of type <paramref name="TElement" /> selected from the input sequence.</returns>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="source" /> or <paramref name="keySelector" /> or <paramref name="elementSelector" /> is <see langword="null" />.-or-
+		/// <paramref name="keySelector" /> produces a key that is <see langword="null" />.</exception>
+		/// <exception cref="T:System.ArgumentException">
+		/// <paramref name="keySelector" /> produces duplicate keys for two elements.</exception>
+		public static Dictionary<TKey,TElement> ToDictionary<TSource,TKey,TElement>(
+			this IEnumerable<TSource> source, Func<TSource,TKey> keySelector, Func<TSource,TElement> elementSelector)
+		{
+			var dic = new Dictionary<TKey,TElement>();
+
+			foreach (var item in source)
+				dic.Add(keySelector(item), elementSelector(item));
+
+			return dic;
 		}
 	}
 }

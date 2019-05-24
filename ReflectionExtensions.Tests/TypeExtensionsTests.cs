@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace ReflectionExtensions.Tests
 {
 	[TestFixture]
-	public class ReflectionExtensionsTests
+	public class TypeExtensionsTests
 	{
 		[Test]
 		public void AssemblyExTest()
@@ -140,11 +140,11 @@ namespace ReflectionExtensions.Tests
 		[Test]
 		public void IsDefinedExTest()
 		{
-			Assert.IsTrue (typeof(ReflectionExtensionsTests).IsDefinedEx(typeof(TestFixtureAttribute)));
-			Assert.IsFalse(typeof(ReflectionExtensionsTests).IsDefinedEx(typeof(TestAttribute)));
+			Assert.IsTrue (typeof(TypeExtensionsTests).IsDefinedEx(typeof(TestFixtureAttribute)));
+			Assert.IsFalse(typeof(TypeExtensionsTests).IsDefinedEx(typeof(TestAttribute)));
 
-			Assert.IsTrue (typeof(ReflectionExtensionsTests).IsDefinedEx(typeof(TestFixtureAttribute), true));
-			Assert.IsFalse(typeof(ReflectionExtensionsTests).IsDefinedEx(typeof(TestAttribute),        true));
+			Assert.IsTrue (typeof(TypeExtensionsTests).IsDefinedEx(typeof(TestFixtureAttribute), true));
+			Assert.IsFalse(typeof(TypeExtensionsTests).IsDefinedEx(typeof(TestAttribute),        true));
 		}
 
 		[Test]
@@ -157,42 +157,42 @@ namespace ReflectionExtensions.Tests
 		[Test]
 		public void GetCustomAttributeExTest1()
 		{
-			var info = typeof(ReflectionExtensionsTests).GetCustomAttributeEx<TestFixtureAttribute>();
+			var info = typeof(TypeExtensionsTests).GetCustomAttributeEx<TestFixtureAttribute>();
 			Assert.That(info, Is.Not.Null);
 		}
 
 		[Test]
 		public void GetCustomAttributeExTest2()
 		{
-			var info = typeof(ReflectionExtensionsTests).GetCustomAttributeEx<TestFixtureAttribute>(true);
+			var info = typeof(TypeExtensionsTests).GetCustomAttributeEx<TestFixtureAttribute>(true);
 			Assert.That(info, Is.Not.Null);
 		}
 
 		[Test]
 		public void GetCustomAttributeExTest3()
 		{
-			var info = typeof(ReflectionExtensionsTests).GetCustomAttributeEx(typeof(TestFixtureAttribute));
+			var info = typeof(TypeExtensionsTests).GetCustomAttributeEx(typeof(TestFixtureAttribute));
 			Assert.That(info, Is.Not.Null);
 		}
 
 		[Test]
 		public void GetCustomAttributeExTest4()
 		{
-			var info = typeof(ReflectionExtensionsTests).GetCustomAttributeEx(typeof(TestFixtureAttribute), true);
+			var info = typeof(TypeExtensionsTests).GetCustomAttributeEx(typeof(TestFixtureAttribute), true);
 			Assert.That(info, Is.Not.Null);
 		}
 
 		[Test]
 		public void GetCustomAttributesExTest1()
 		{
-			var info = typeof(ReflectionExtensionsTests).GetCustomAttributesEx();
+			var info = typeof(TypeExtensionsTests).GetCustomAttributesEx();
 			Assert.That(info, Is.Not.Null);
 		}
 
 		[Test]
 		public void GetCustomAttributesExTest2()
 		{
-			var info = typeof(ReflectionExtensionsTests).GetCustomAttributesEx(typeof(TestFixtureAttribute), true);
+			var info = typeof(TypeExtensionsTests).GetCustomAttributesEx(typeof(TestFixtureAttribute), true);
 			Assert.That(info, Is.Not.Null);
 		}
 

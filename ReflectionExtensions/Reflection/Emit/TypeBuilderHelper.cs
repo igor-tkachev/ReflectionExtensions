@@ -7,7 +7,7 @@ using System.Reflection.Emit;
 
 using JetBrains.Annotations;
 
-namespace ReflectionExtensions.Emit
+namespace ReflectionExtensions.Reflection.Emit
 {
 	using TypeBuilder.Builders;
 

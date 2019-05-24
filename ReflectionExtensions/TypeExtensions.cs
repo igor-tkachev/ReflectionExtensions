@@ -21,7 +21,7 @@ using System.Runtime.InteropServices;
 
 namespace ReflectionExtensions
 {
-	public static partial class ReflectionExtensions
+	public static class TypeExtensions
 	{
 		#region Helpers
 
@@ -255,7 +255,7 @@ namespace ReflectionExtensions
 		[MethodImpl(AggressiveInlining)]
 		public static Type? ReflectedTypeEx(this Type type)
 		{
-#if NETSTANDARDLESS1_6 || NETCOREAPP1_0 || NETCOREAPP1_1
+#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARDLESS1_6
 			return null;
 #else
 			return type.TypeInfo().ReflectedType;
@@ -626,7 +626,7 @@ namespace ReflectionExtensions
 		/// <exception cref="T:System.ArgumentException">
 		/// <paramref name="types" /> is multidimensional. </exception>
 		[MethodImpl(AggressiveInlining)]
-		public static ConstructorInfo GetConstructorEx(this Type type, Type[] types)
+		public static ConstructorInfo GetConstructorEx(this Type type, params Type[] types)
 		{
 #if NETSTANDARDLESS1_4
 			throw new NotImplementedException();
@@ -680,6 +680,47 @@ namespace ReflectionExtensions
 		}
 
 #endif
+
+		/// <summary>
+		/// Returns default constructor.
+		/// </summary>
+		/// <param name="type">A <see cref="System.Type"/> instance. </param>
+		/// <param name="exceptionIfNotExists">if true, throws an exception if type does not exists default constructor.
+		/// Otherwise returns null.</param>
+		/// <returns>Returns <see cref="ConstructorInfo"/> or null.</returns>
+		[MethodImpl(AggressiveInlining)]
+		public static ConstructorInfo? GetDefaultConstructor(this Type type, bool exceptionIfNotExists = false)
+		{
+#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARDLESS1_6
+
+			ConstructorInfo? info = null;
+
+			foreach (var ctor in type.TypeInfo().DeclaredConstructors)
+			{
+				if (ctor.GetParameters().Length == 0)
+				{
+					info = ctor;
+					break;
+				}
+			}
+
+#else
+
+			var info = type.GetConstructor(
+				BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+				null,
+				Type.EmptyTypes,
+				null);
+
+#endif
+
+			if (info == null && exceptionIfNotExists)
+			{
+				throw new InvalidOperationException($"The '{type.FullName}' type must have default or init constructor.");
+			}
+
+			return info;
+		}
 
 		/// <summary>Returns all the public constructors defined for the current <see cref="T:System.Type" />.</summary>
 		/// <returns>
@@ -1050,6 +1091,27 @@ namespace ReflectionExtensions
 			this Type type, string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers)
 		{
 			return type.TypeInfo().GetMethod(name, bindingAttr, binder, callConvention, types, modifiers);
+		}
+
+		/// <summary>
+		/// Searches for the method defined for a <see cref="System.Type"/>,
+		/// using the specified name and binding flags.
+		/// </summary>
+		/// <param name="methodName">The String containing the name of the method to get.</param>
+		/// <param name="generic">True to search only for a generic method, or
+		/// False to search only for non-generic method.</param>
+		/// <param name="type">A <see cref="System.Type"/> instance. </param>
+		/// <param name="flags">A bitmask comprised of one or more <see cref="BindingFlags"/>
+		/// that specify how the search is conducted.</param>
+		/// <returns>A <see cref="MethodInfo"/> object representing the method
+		/// that matches the specified requirements, if found; otherwise, null.</returns>
+		public static MethodInfo? GetMethod(this Type type, bool generic, string methodName, BindingFlags flags)
+		{
+			foreach (var method in type.GetMethods(flags))
+				if (method.IsGenericMethodDefinition == generic && method.Name == methodName)
+					return method;
+
+			return null;
 		}
 
 #endif
@@ -1987,6 +2049,47 @@ namespace ReflectionExtensions
 			return element.GetCustomAttributes(attributeType, inherit).Cast<Attribute>().ToArray();
 		}
 
+#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARDLESS1_6
+
+		/// <summary>When overridden in a derived class, returns an array of custom attributes applied to this member and identified by <see cref="T:System.Type" />.</summary>
+		/// <param name="type">The member to inspect.</param>
+		/// <param name="attributeType">The type of attribute to search for. Only attributes that are assignable to this type are returned. </param>
+		/// <param name="inherit">
+		/// <see langword="true" /> to search this member's inheritance chain to find the attributes; otherwise, <see langword="false" />. This parameter is ignored for properties and events; see Remarks. </param>
+		/// <returns>An array of custom attributes applied to this member, or an array with zero elements if no attributes assignable to <paramref name="attributeType" /> have been applied.</returns>
+		/// <exception cref="T:System.TypeLoadException">A custom attribute type cannot be loaded. </exception>
+		/// <exception cref="T:System.ArgumentNullException">If <paramref name="attributeType" /> is <see langword="null" />.</exception>
+		/// <exception cref="T:System.InvalidOperationException">This member belongs to a type that is loaded into the reflection-only context. See How to: Load Assemblies into the Reflection-Only Context.</exception>
+		[MethodImpl(AggressiveInlining)]
+		public static Attribute[] GetCustomAttributesEx(this Type type, Type attributeType, bool inherit)
+		{
+			return type.TypeInfo().GetCustomAttributes(attributeType, inherit).Cast<Attribute>().ToArray();
+		}
+
+#endif
+
+		/// <summary>Retrieves a collection of custom attributes of a specified type that are applied to a specified member, and optionally inspects the ancestors of that member.</summary>
+		/// <param name="type">The member to inspect.</param>
+		/// <param name="inherit">
+		/// <see langword="true" /> to inspect the ancestors of <paramref name="type" />; otherwise, <see langword="false" />.</param>
+		/// <typeparam name="T">The type of attribute to search for.</typeparam>
+		/// <returns>A collection of the custom attributes that are applied to <paramref name="type" /> and that match <typeparamref name="T" />, or an empty collection if no such attributes exist.</returns>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="type" /> is <see langword="null" />.</exception>
+		/// <exception cref="T:System.NotSupportedException">
+		/// <paramref name="type" /> is not a constructor, method, property, event, type, or field.</exception>
+		/// <exception cref="T:System.TypeLoadException">A custom attribute type cannot be loaded.</exception>
+		[MethodImpl(AggressiveInlining)]
+		public static T[] GetCustomAttributesEx<T>(this Type type, bool inherit)
+			where T : Attribute
+		{
+#if NET20 || NET30 || NET35 || NET40
+			return type.GetCustomAttributes(typeof(T), inherit).Cast<T>().ToArray();
+#else
+			return type.TypeInfo().GetCustomAttributes<T>(inherit).ToArray();
+#endif
+		}
+
 		#endregion
 
 		#region MemberInfo
@@ -2136,7 +2239,7 @@ namespace ReflectionExtensions
 			return false;
 		}
 
-		public static bool IsNullableType(Type type)
+		public static bool IsNullableType(this Type type)
 		{
 			return type.IsGenericTypeEx() && type.GetGenericTypeDefinitionEx() == typeof(Nullable<>);
 		}
@@ -2166,7 +2269,7 @@ namespace ReflectionExtensions
 		#endregion
 	}
 
-	public static partial class AssemblyExtensions
+	public static class AssemblyExtensions
 	{
 		#region Assembly
 

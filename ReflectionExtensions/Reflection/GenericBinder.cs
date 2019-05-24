@@ -4,7 +4,7 @@ using System;
 using System.Globalization;
 using System.Reflection;
 
-namespace ReflectionExtensions
+namespace ReflectionExtensions.Reflection
 {
 	/// <Summary>
 	/// Selects a member from a list of candidates, and performs type conversion

@@ -2,12 +2,15 @@
 using System.Diagnostics;
 using System.Linq;
 
+using JetBrains.Annotations;
+
 namespace ReflectionExtensions.Common
 {
 	/// <summary>
 	/// This argument adapter class allows either names (strings) or
 	/// indices (ints) to be passed to a function.
 	/// </summary>
+	[PublicAPI]
 	[DebuggerStepThrough]
 	public struct NameOrIndexParameter
 	{
@@ -120,6 +123,5 @@ namespace ReflectionExtensions.Common
 		}
 
 		#endregion
-
 	}
 }
