@@ -12,7 +12,7 @@ namespace ReflectionExtensions.Reflection
 		public object[]?      Parameters       { get; set; }
 		public bool           IsInternal       { get; set; }
 		public bool           IsLazyInstance   { get; set; }
-//		public object         Parent           { get; set; }
+		public object?        Parent           { get; set; }
 //		public object         SourceObject     { get; set; }
 //		public ObjectMapper   ObjectMapper     { get; set; }
 //		public MappingSchema  MappingSchema    { get; set; }

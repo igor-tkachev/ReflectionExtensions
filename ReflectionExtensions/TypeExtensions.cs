@@ -628,10 +628,30 @@ namespace ReflectionExtensions
 		[MethodImpl(AggressiveInlining)]
 		public static ConstructorInfo? GetConstructorEx(this Type type, params Type[] types)
 		{
-#if NETSTANDARDLESS1_4
-			return null;
+#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARDLESS1_6
+			return type.TypeInfo().DeclaredConstructors.FirstOrDefault(c =>
+			{
+				var p = c.GetParameters();
+
+				if (types == null)
+					return p.Length == 0;
+
+				if (p.Length != types.Length)
+					return false;
+
+				for (var i = 0; i < p.Length; i++)
+					if (p[i].ParameterType != types[i])
+						return false;
+
+				return true;
+			});
 #else
-			return type.TypeInfo().GetConstructor(types);
+			return type.TypeInfo().GetConstructor(
+				BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+				null,
+				types,
+				null);
+
 #endif
 		}
 
@@ -653,7 +673,7 @@ namespace ReflectionExtensions
 		/// <paramref name="types" /> and <paramref name="modifiers" /> do not have the same length. </exception>
 		[MethodImpl(AggressiveInlining)]
 		public static ConstructorInfo GetConstructorEx(
-			this Type type, BindingFlags bindingAttr, Binder binder, Type[] types, ParameterModifier[] modifiers)
+			this Type type, BindingFlags bindingAttr, Binder? binder, Type[] types, ParameterModifier[]? modifiers)
 		{
 			return type.TypeInfo().GetConstructor(bindingAttr, binder, types, modifiers);
 		}

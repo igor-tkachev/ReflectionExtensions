@@ -863,11 +863,11 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 					.dup
 					.ldarg_0
-					.callvirt (InitContextType.GetProperty("Parent").GetSetMethod())
+					.callvirt (InitContextType.GetProperty(nameof(InitContext.Parent)).GetSetMethod())
 
 					.dup
 					.ldc_i4_1
-					.callvirt (InitContextType.GetProperty("IsInternal").GetSetMethod())
+					.callvirt (InitContextType.GetProperty(nameof(InitContext.IsInternal)).GetSetMethod())
 
 					.stloc    (initField)
 					;

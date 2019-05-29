@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using ReflectionExtensions.TypeBuilder;
-using ReflectionExtensions.TypeBuilder.Builders;
 #if !NET20 && !NET30
 using System.Linq.Expressions;
 #endif
@@ -38,60 +37,53 @@ namespace ReflectionExtensions.Reflection
 				var ctor  = type.IsAbstractEx() ? null : type.GetDefaultConstructor();
 				var ctor2 = type.IsAbstractEx() ? null : type.GetConstructorEx(typeof(InitContext));
 
-#if NET20 || NET30
-
-				if (ctor == null)
-				{
-					if (type.IsAbstractEx()) {_createInstance = ThrowAbstractException;}
-					else                     _createInstance = ThrowException;
-				}
-				else
-				{
-					_createInstance = () => (T)Activator.CreateInstance(InstanceType);
-				}
-
-				if (ctor2 != null)
-				{
-					_createInstance2 = ctx => (T)Activator.CreateInstance(InstanceType, new object[] { ctx });
-				}
-				else
-				{
-					_createInstance2 = ctx => _createInstance();
-				}
-
-#else
-				Expression<Func<T>> createInstanceExpression;
-
-				if (ctor == null)
-				{
-					Expression<Func<T>> mi;
-
-					if (type.IsAbstractEx()) mi = () => ThrowAbstractException();
-					else                     mi = () => ThrowException();
-
-					var body = Expression.Call(null, ((MethodCallExpression)mi.Body).Method);
-
-					createInstanceExpression = Expression.Lambda<Func<T>>(body);
-				}
-				else
-				{
-					createInstanceExpression = Expression.Lambda<Func<T>>(Expression.New(ctor));
-				}
-
-				_createInstance = createInstanceExpression.Compile();
-
-				if (ctor2 != null)
-				{
-					var p = Expression.Parameter(typeof(InitContext), "p");
-					var createInstanceExpression2 = Expression.Lambda<Func<InitContext,T>>(Expression.New(ctor2, p), p);
-
-					_createInstance2 = createInstanceExpression2.Compile();
-				}
-				else
-				{
-					_createInstance2 = ctx => _createInstance();
-				}
+#if !NET20 && !NET30
+				var p = Expression.Parameter(typeof(InitContext), "p");
 #endif
+
+				switch (ctor,ctor2,type.IsAbstractEx())
+				{
+					case (null, null, true) :
+						_createInstance  =        ThrowAbstractException;
+						_createInstance2 = ctx => ThrowAbstractException();
+						break;
+
+					case (null, null, false) :
+						_createInstance  =        ThrowException;
+						_createInstance2 = ctx => ThrowException();
+						break;
+
+					case (var c1, null, _) :
+#if NET20 || NET30
+						_createInstance  = ()  => (T)Activator.CreateInstance(InstanceType);
+						_createInstance2 = ctx => (T)Activator.CreateInstance(InstanceType);
+#else
+						_createInstance  = Expression.Lambda<Func<T>>(Expression.New(c1)).Compile();
+						_createInstance2 = ctx => _createInstance();
+#endif
+						break;
+
+					case (null, var c2, _) :
+#if NET20 || NET30
+						_createInstance  = ()  => (T)Activator.CreateInstance(InstanceType, new object?[] { (InitContext?)null });
+						_createInstance2 = ctx => (T)Activator.CreateInstance(InstanceType, new object[] { ctx });
+#else
+						_createInstance2 = Expression.Lambda<Func<InitContext, T>>(Expression.New(c2, p), p).Compile();
+						_createInstance  = () => _createInstance2(null);
+#endif
+						break;
+
+					case var (c1, c2, _):
+#if NET20 || NET30
+						_createInstance  = ()  => (T)Activator.CreateInstance(InstanceType);
+						_createInstance2 = ctx => (T)Activator.CreateInstance(InstanceType, new object[] { ctx });
+#else
+						_createInstance = Expression.Lambda<Func<T>>(Expression.New(c1)).Compile();
+						_createInstance2 = Expression.Lambda<Func<InitContext, T>>(Expression.New(c2, p), p).Compile();
+#endif
+						break;
+
+				}
 			}
 
 			var members = new List<MemberInfo>();
@@ -231,6 +223,27 @@ namespace ReflectionExtensions.Reflection
 
 					if (type.GetConstructorEx(typeof(InitContext)) != null)
 						return true;
+
+/*
+					var ctor = type.GetConstructorEx(
+						BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+						null,
+						new Type[0],
+						null);
+
+					if (ctor != null)
+						return true;
+
+					ctor = type.GetConstructorEx(
+						BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+						null,
+						new Type[] { typeof(InitContext) },
+						null);
+
+					if (ctor != null)
+						return true;
+
+ */
 				}
 				else
 				{
