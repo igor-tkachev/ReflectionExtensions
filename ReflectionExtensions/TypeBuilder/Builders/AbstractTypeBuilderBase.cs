@@ -1,12 +1,10 @@
 ﻿#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Diagnostics;
 
 namespace ReflectionExtensions.TypeBuilder.Builders
 {
@@ -20,9 +18,15 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			return new Type[0];
 		}
 
-		public  int           ID            { get; set; }
-		public  object        TargetElement { get; set; }
-		public  BuildContext  Context       { [DebuggerStepThrough] get; [DebuggerStepThrough] set; }
+		public int     ID            { get; set; }
+		public object? TargetElement { get; set; }
+
+		private BuildContext? _context;
+		public  BuildContext   Context
+		{
+			get => _context         ?? throw new InvalidOperationException();
+			set => _context = value ?? throw new InvalidOperationException();
+		}
 
 		public virtual bool IsCompatible(BuildContext context, IAbstractTypeBuilder typeBuilder)
 		{
@@ -197,7 +201,6 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		#region Helpers
 
-		[SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
 		protected bool CallLazyInstanceInsurer(FieldBuilder field)
 		{
 			if (field == null) throw new ArgumentNullException(nameof(field));
@@ -214,7 +217,6 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			return ensurer != null;
 		}
 
-		[SuppressMessage("Microsoft.Performance", "CA1818:DoNotConcatenateStringsInsideLoops")]
 		protected virtual string GetFieldName(PropertyInfo propertyInfo)
 		{
 			var name = propertyInfo.Name;
@@ -232,6 +234,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		protected string GetFieldName()
 		{
+			Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
 			return GetFieldName(Context.CurrentProperty);
 		}
 
@@ -256,7 +259,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				if (index.Length == 0)
 				{
 					emit
-						.ldsfld (GetType().GetField(nameof(EmptyTypes)))
+						.ldsfld (typeof(AbstractTypeBuilderBase).GetFieldEx(
+							nameof(EmptyTypes), BindingFlags.Public | BindingFlags.Static))
 						;
 				}
 				else
@@ -277,7 +281,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				}
 
 				emit
-					.call   (GetType().GetMethodEx(nameof(GetPropertyInfo)))
+					.call   (typeof(AbstractTypeBuilderBase).GetMethodEx(nameof(GetPropertyInfo), BindingFlags.Public | BindingFlags.Static))
 					.stsfld (field)
 					;
 			}
@@ -285,7 +289,9 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			return field;
 		}
 
-		static PropertyInfo GetPropertyInfo(Type type, string propertyName, Type returnType, Type[] types)
+		public static readonly Type[] EmptyTypes = Type.EmptyTypes;
+
+		public static PropertyInfo GetPropertyInfo(Type type, string propertyName, Type returnType, Type[] types)
 		{
 			return type.GetPropertyEx(
 				propertyName,
@@ -296,24 +302,23 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				null);
 		}
 
-		static Type[] EmptyTypes => Type.EmptyTypes;
-
 		protected FieldBuilder GetPropertyInfoField()
 		{
+			Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
 			return GetPropertyInfoField(Context.CurrentProperty);
 		}
 
 		protected FieldBuilder GetParameterField()
 		{
-			string       fieldName = GetFieldName() + "_$parameters";
-			FieldBuilder field     = Context.GetField(fieldName);
+			var fieldName = GetFieldName() + "_$parameters";
+			var field     = Context.GetField(fieldName);
 
 			if (field == null)
 			{
 				field = Context.CreatePrivateStaticField(fieldName, typeof(object[]));
 
-				FieldBuilder piField = GetPropertyInfoField();
-				EmitHelper   emit    = Context.TypeBuilder.TypeInitializer.Emitter;
+				var piField = GetPropertyInfoField();
+				var emit    = Context.TypeBuilder.TypeInitializer.Emitter;
 
 				emit
 					.ldsfld (piField)
@@ -327,7 +332,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		static object[]? GetPropertyParameters(PropertyInfo propertyInfo)
 		{
-			if (propertyInfo == null) throw new ArgumentNullException("propertyInfo");
+			if (propertyInfo == null) throw new ArgumentNullException(nameof(propertyInfo));
 
 			var attrs = propertyInfo.GetCustomAttributes(typeof(ParameterAttribute), true);
 
@@ -341,7 +346,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 			var gAttrs = propertyInfo.DeclaringType.GetCustomAttributesEx<GlobalInstanceTypeAttribute>(true);
 
-			foreach (GlobalInstanceTypeAttribute attr in gAttrs)
+			foreach (var attr in gAttrs)
 				if (attr.PropertyType.IsSameOrParentOf(propertyInfo.PropertyType))
 					return attr.Parameters;
 
@@ -393,6 +398,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 					var ci = arrayType.GetConstructorEx(parameters);
 
+					Debug.Assert(ci != null, nameof(ci) + " != null");
+
 					emit
 						.newobj (ci)
 						.stsfld (field)
@@ -413,12 +420,16 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		protected FieldBuilder GetArrayInitializer()
 		{
+			Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
 			return GetArrayInitializer(Context.CurrentProperty.PropertyType);
 		}
 
 		protected virtual Type GetFieldType()
 		{
-			var pi    = Context.CurrentProperty;
+			var pi = Context.CurrentProperty;
+
+			Debug.Assert(pi != null, nameof(pi) + " != null");
+
 			var index = pi.GetIndexParameters();
 
 			switch (index.Length)

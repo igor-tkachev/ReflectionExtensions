@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace ReflectionExtensions.Tests.Patterns
 {
 	using ReflectionExtensions.Patterns;
-	using TypeBuilder;
+	using ReflectionExtensions.TypeBuilder;
 
 	[TestFixture]
 	public class MustImplementAttributeTest

@@ -8,7 +8,8 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-
+using ReflectionExtensions.TypeBuilder;
+using ReflectionExtensions.TypeBuilder.Builders;
 #if !NET20 && !NET30
 using System.Linq.Expressions;
 #endif
@@ -22,12 +23,18 @@ namespace ReflectionExtensions.Reflection
 	/// <typeparam name="T">Type to access.</typeparam>
 	public class TypeAccessor<T> : TypeAccessor
 	{
-		static TypeAccessor()
+		internal TypeAccessor()
 		{
-			var type = typeof(T);
+			var type = InstanceType = typeof(T);
 
 			if (!type.IsValueTypeEx())
 			{
+
+#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
+
+				type = InstanceType = (IsClassBuilderNeeded(type) ? null : type) ?? TypeFactory.GetType(type);
+#endif
+
 				var ctor = type.IsAbstractEx() ? null : type.GetDefaultConstructor();
 
 #if NET20 || NET30
@@ -39,7 +46,7 @@ namespace ReflectionExtensions.Reflection
 				}
 				else
 				{
-					_createInstance = () => (T)Activator.CreateInstance(type);
+					_createInstance = () => (T)Activator.CreateInstance(InstanceType);
 				}
 
 #else
@@ -65,6 +72,8 @@ namespace ReflectionExtensions.Reflection
 #endif
 			}
 
+			var members = new List<MemberInfo>();
+
 #if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARDLESS1_6
 
 			foreach (var memberInfo in type.GetMembersEx())
@@ -72,11 +81,11 @@ namespace ReflectionExtensions.Reflection
 				switch (memberInfo)
 				{
 					case FieldInfo f when !f.IsStatic && f.IsPublic :
-						_members.Add(memberInfo);
+						members.Add(memberInfo);
 						break;
 
 					case PropertyInfo p when !p.GetMethod.IsStatic && p.GetMethod.IsPublic && p.GetIndexParameters().Length == 0 :
-						_members.Add(memberInfo);
+						members.Add(memberInfo);
 						break;
 				}
 			}
@@ -88,7 +97,7 @@ namespace ReflectionExtensions.Reflection
 				if (memberInfo.MemberType == MemberTypes.Field ||
 					memberInfo.MemberType == MemberTypes.Property && ((PropertyInfo)memberInfo).GetIndexParameters().Length == 0)
 				{
-					_members.Add(memberInfo);
+					members.Add(memberInfo);
 				}
 			}
 
@@ -119,7 +128,7 @@ namespace ReflectionExtensions.Reflection
 							if ((getMethod == null || interfaceMethods.Contains(getMethod)) &&
 								(setMethod == null || interfaceMethods.Contains(setMethod)))
 							{
-								_members.Add(pi);
+								members.Add(pi);
 							}
 						}
 					}
@@ -136,7 +145,7 @@ namespace ReflectionExtensions.Reflection
 							if ((getMethod == null || interfaceMethods.Contains(getMethod)) &&
 								(setMethod == null || interfaceMethods.Contains(setMethod)))
 							{
-								_members.Add(pi);
+								members.Add(pi);
 							}
 						}
 					}
@@ -144,13 +153,8 @@ namespace ReflectionExtensions.Reflection
 #endif
 				}
 			}
-		}
 
-		static readonly List<MemberInfo> _members = new List<MemberInfo>();
-
-		internal TypeAccessor()
-		{
-			foreach (var member in _members)
+			foreach (var member in members)
 				AddMember(new MemberAccessor(this, member));
 		}
 
@@ -181,10 +185,36 @@ namespace ReflectionExtensions.Reflection
 		/// </summary>
 		public override Type Type => typeof(T);
 
+		public override Type InstanceType { get; }
+
 		/// <summary>
 		/// Creates an instance of <see cref="TypeAccessor{T}"/>.
 		/// </summary>
 		/// <returns>Instance of <see cref="TypeAccessor{T}"/>.</returns>
 		public static TypeAccessor<T> GetAccessor() => GetAccessor<T>();
+
+		static bool IsClassBuilderNeeded(Type type)
+		{
+			if (type.IsAbstractEx() && !type.IsSealedEx())
+			{
+				if (!type.IsInterfaceEx())
+				{
+					if (type.GetDefaultConstructor() != null)
+						return true;
+
+					if (type.GetConstructorEx(typeof(InitContext)) != null)
+						return true;
+				}
+				else
+				{
+					var attr = type.GetCustomAttributeEx<AutoImplementInterfaceAttribute>();
+
+					if (attr != null)
+						return true;
+				}
+			}
+
+			return false;
+		}
 	}
 }

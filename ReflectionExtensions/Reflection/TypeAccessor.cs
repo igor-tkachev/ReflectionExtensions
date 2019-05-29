@@ -11,7 +11,7 @@ namespace ReflectionExtensions.Reflection
 	/// <summary>
 	/// Provides fast access to type and its members.
 	/// </summary>
-	[DebuggerDisplay("Type = {" + nameof(Type) + "}")]
+	[DebuggerDisplay("Type = {Type}, OriginalType = {OriginalType}")]
 	[PublicAPI]
 	public abstract class TypeAccessor
 	{
@@ -41,6 +41,35 @@ namespace ReflectionExtensions.Reflection
 		public virtual object CreateInstance() =>
 			throw new InvalidOperationException($"The '{Type.Name}' type must have public default or init constructor.");
 
+		[Pure]
+		[DebuggerStepThrough]
+		public virtual object CreateInstance(InitContext? context)
+		{
+			return CreateInstance();
+		}
+
+		[Pure]
+		[DebuggerStepThrough]
+		public object CreateInstanceEx()
+		{
+			return ObjectFactory != null
+				? ObjectFactory.CreateInstance(this, null)
+				: CreateInstance(null);
+		}
+
+		[Pure]
+		[DebuggerStepThrough]
+		public object CreateInstanceEx(InitContext context)
+		{
+			return ObjectFactory != null ? ObjectFactory.CreateInstance(this, context) : CreateInstance(context);
+		}
+
+		#endregion
+
+		#region ObjectFactory
+
+		public IObjectFactory? ObjectFactory { get; set; }
+
 		#endregion
 
 		#region Public Members
@@ -48,7 +77,10 @@ namespace ReflectionExtensions.Reflection
 		/// <summary>
 		/// Type to access.
 		/// </summary>
-		public abstract Type Type { get; }
+		public abstract Type Type         { get; }
+
+		public abstract Type InstanceType { get; }
+
 
 		/// <summary>
 		/// Type members.
@@ -59,6 +91,7 @@ namespace ReflectionExtensions.Reflection
 		#endregion
 
 		#region Items
+
 		readonly Dictionary<string,MemberAccessor> _membersByName = new Dictionary<string,MemberAccessor>();
 
 		/// <summary>
@@ -94,6 +127,9 @@ namespace ReflectionExtensions.Reflection
 				if (_accessors.TryGetValue(type, out var accessor))
 					return accessor;
 
+				if (IsAssociatedType(type))
+					return _accessors[type];
+
 				var accessorType = typeof(TypeAccessor<>).MakeGenericType(type);
 
 				accessor = (TypeAccessor)Activator.CreateInstance(accessorType, true);
@@ -112,13 +148,7 @@ namespace ReflectionExtensions.Reflection
 		[NotNull, Pure]
 		public static TypeAccessor<T> GetAccessor<T>()
 		{
-			lock (_accessors)
-			{
-				if (_accessors.TryGetValue(typeof(T), out var accessor))
-					return (TypeAccessor<T>)accessor;
-
-				return (TypeAccessor<T>)(_accessors[typeof(T)] = new TypeAccessor<T>());
-			}
+			return (TypeAccessor<T>)GetAccessor(typeof(T));
 		}
 
 		internal static bool IsInstanceBuildable(Type type)
@@ -140,7 +170,7 @@ namespace ReflectionExtensions.Reflection
 			return attrs != null && attrs.Length > 0;
 		}
 
-		private static bool IsAssociatedType(Type type)
+		static bool IsAssociatedType(Type type)
 		{
 			if (AssociatedTypeHandler != null)
 			{

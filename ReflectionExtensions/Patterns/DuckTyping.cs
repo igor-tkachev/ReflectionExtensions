@@ -75,7 +75,7 @@ namespace ReflectionExtensions.Patterns
 		/// <param name="obj">An object which type expected to have all members of the given interface.</param>
 		/// <param name="throwException">If true, throws an exception if object can not be created.</param>
 		/// <returns>An object which implements the interface.</returns>
-		public static object? Implement(this Type interfaceType, Type? baseObjectType, object obj, bool throwException)
+		public static object? Implement(this Type interfaceType, Type? baseObjectType, object? obj, bool throwException)
 		{
 			if (obj == null) throw new ArgumentNullException(nameof(obj));
 
@@ -129,7 +129,7 @@ namespace ReflectionExtensions.Patterns
 		/// When this parameter is set to null, the object type will be used.</param>
 		/// <param name="obj">An object which type expected to have all members of the given interface.</param>
 		/// <returns>An object which implements the interface.</returns>
-		public static object Implement(this Type interfaceType, Type? baseObjectType, object obj)
+		public static object Implement(this Type interfaceType, Type? baseObjectType, object? obj)
 		{
 			var o = interfaceType.Implement(baseObjectType, obj, true);
 
@@ -160,7 +160,7 @@ namespace ReflectionExtensions.Patterns
 		/// <param name="interfaceType">An interface type to implement.</param>
 		/// <param name="obj">An object which type expected to have all members of the given interface.</param>
 		/// <returns>An object which implements the interface.</returns>
-		public static object Implement(this Type interfaceType, object obj)
+		public static object Implement(this Type interfaceType, object? obj)
 		{
 			return interfaceType.Implement(null, obj);
 		}
@@ -264,7 +264,7 @@ namespace ReflectionExtensions.Patterns
 		/// <typeparam name="TI">An interface type to implement.</typeparam>
 		/// <param name="obj">An object which type expected to have all members of the given interface.</param>
 		/// <returns>An object which implements the interface.</returns>
-		public static TI Implement<TI>(object obj)
+		public static TI Implement<TI>(object? obj)
 			where TI : class
 		{
 			return (TI)Implement(typeof(TI), null, obj);

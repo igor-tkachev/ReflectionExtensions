@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace ReflectionExtensions.Tests.Patterns
 {
 	using ReflectionExtensions.Patterns;
-	using TypeBuilder;
+	using ReflectionExtensions.TypeBuilder;
 
 	[TestFixture]
 	public class DuckTypingTest
@@ -230,7 +230,7 @@ namespace ReflectionExtensions.Tests.Patterns
 				TestInterface? o = null;
 
 				_ = DuckTyping.Implement<TestInterface>(o);
-				_ = (TestInterface?)DuckTyping.Implement(typeof(TestInterface), o);
+				_ = (TestInterface?)typeof(TestInterface).Implement(o);
 			});
 		}
 

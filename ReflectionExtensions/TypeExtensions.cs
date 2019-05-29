@@ -626,10 +626,10 @@ namespace ReflectionExtensions
 		/// <exception cref="T:System.ArgumentException">
 		/// <paramref name="types" /> is multidimensional. </exception>
 		[MethodImpl(AggressiveInlining)]
-		public static ConstructorInfo GetConstructorEx(this Type type, params Type[] types)
+		public static ConstructorInfo? GetConstructorEx(this Type type, params Type[] types)
 		{
 #if NETSTANDARDLESS1_4
-			throw new NotImplementedException();
+			return null;
 #else
 			return type.TypeInfo().GetConstructor(types);
 #endif
@@ -832,7 +832,7 @@ namespace ReflectionExtensions
 		/// <exception cref="T:System.ArgumentNullException">
 		/// <paramref name="name" /> is <see langword="null" />. </exception>
 		[MethodImpl(AggressiveInlining)]
-		public static FieldInfo GetGetFieldEx(this Type type, string name, BindingFlags bindingAttr)
+		public static FieldInfo GetFieldEx(this Type type, string name, BindingFlags bindingAttr)
 		{
 			return type.TypeInfo().GetField(name, bindingAttr);
 		}
@@ -982,7 +982,7 @@ namespace ReflectionExtensions
 		/// <exception cref="T:System.ArgumentNullException">
 		/// <paramref name="name" /> is <see langword="null" />. </exception>
 		[MethodImpl(AggressiveInlining)]
-		public static MemberInfo GetMethodEx(this Type type, string name, BindingFlags bindingAttr)
+		public static MethodInfo GetMethodEx(this Type type, string name, BindingFlags bindingAttr)
 		{
 			return type.TypeInfo().GetMethod(name, bindingAttr);
 		}
@@ -1020,7 +1020,7 @@ namespace ReflectionExtensions
 		/// <exception cref="T:System.ArgumentException">
 		/// <paramref name="types" /> is multidimensional. </exception>
 		[MethodImpl(AggressiveInlining)]
-		public static MethodInfo GetMethodEx(this Type type, string name, Type[] types)
+		public static MethodInfo GetMethodEx(this Type type, string name, params Type[] types)
 		{
 			return type.TypeInfo().GetMethod(name, types);
 		}
@@ -1420,7 +1420,7 @@ namespace ReflectionExtensions
 		/// <paramref name="types" /> and <paramref name="modifiers" /> do not have the same length. </exception>
 		/// <exception cref="T:System.NullReferenceException">An element of <paramref name="types" /> is <see langword="null" />.</exception>
 		[MethodImpl(AggressiveInlining)]
-		public static PropertyInfo GetPropertyEx(this Type type, string name, BindingFlags bindingAttr, Binder binder, Type returnType, Type[] types, ParameterModifier[] modifiers)
+		public static PropertyInfo GetPropertyEx(this Type type, string name, BindingFlags bindingAttr, Binder? binder, Type returnType, Type[] types, ParameterModifier[]? modifiers)
 		{
 			return type.TypeInfo().GetProperty(name, bindingAttr, binder, returnType, types, modifiers);
 		}

@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Diagnostics.CodeAnalysis;
 
 namespace ReflectionExtensions.TypeBuilder.Builders
 {
@@ -193,6 +192,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		static void CheckCompatibility(BuildContext context, List<IAbstractTypeBuilder> builders)
 		{
+#nullable disable
 			for (var i = 0; i < builders.Count; i++)
 			{
 				var cur = builders[i];
@@ -215,6 +215,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			for (var i = 0; i < builders.Count; i++)
 				if (builders[i] == null)
 					builders.RemoveAt(i--);
+#nullable restore
 		}
 
 		void DefineNonAbstractType()
@@ -258,7 +259,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			_context.TypeBuilder = _context.AssemblyBuilder.DefineType(
 				typeName,
 				TypeAttributes.Public | TypeAttributes.BeforeFieldInit | (TypeFactory.SealTypes? TypeAttributes.Sealed: 0),
-				_context.Type.IsInterface? typeof(object): (Type)_context.Type,
+				_context.Type.IsInterface ? typeof(object) : _context.Type,
 				interfaces.ToArray());
 
 			if (_context.Type.IsSerializable)
@@ -274,7 +275,6 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 			readonly BuildContext _context;
 
-			[SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods")]
 			public int Compare(IAbstractTypeBuilder x, IAbstractTypeBuilder y)
 			{
 				return y.GetPriority(_context) - x.GetPriority(_context);
@@ -336,8 +336,10 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				emit.InitOutParameters(parameters);
 		}
 
-		void EmitMethod(List<IAbstractTypeBuilder> builders, MethodInfo methdoInfo, BuildElement buildElement)
+		void EmitMethod(List<IAbstractTypeBuilder> builders, MethodInfo methodInfo, BuildElement buildElement)
 		{
+			Debug.Assert(_context != null, nameof(_context) + " != null");
+
 			SetID(builders);
 
 			_context.BuildElement = buildElement;
@@ -351,7 +353,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				isFinallyBlockRequired = isFinallyBlockRequired || IsApplied(builder, builders, BuildStep.Finally);
 			}
 
-			BeginEmitMethod(methdoInfo);
+			BeginEmitMethod(methodInfo);
 
 			Build(BuildStep.Begin,  builders);
 
@@ -422,6 +424,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		void EndEmitMethod()
 		{
+			Debug.Assert(_context != null, nameof(_context) + " != null");
+
 			var emit = _context.MethodBuilder.Emitter;
 
 			// Prepare return.
@@ -435,9 +439,11 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 			// Cleanup the context.
 			//
+#nullable disable
 			_context.ReturnValue   = null;
 			_context.CurrentMethod = null;
 			_context.MethodBuilder = null;
+#nullable restore
 		}
 
 		static List<IAbstractTypeBuilder> GetBuilders(object[] attributes, object target)
@@ -499,12 +505,16 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		bool IsApplied(IAbstractTypeBuilder builder, List<IAbstractTypeBuilder> builders, BuildStep buildStep)
 		{
+			Debug.Assert(_context != null, nameof(_context) + " != null");
+
 			_context.Step = buildStep;
 			return builder.IsApplied(_context, builders);
 		}
 
 		bool IsApplied(BuildElement element, List<IAbstractTypeBuilder> builders)
 		{
+			Debug.Assert(_context != null, nameof(_context) + " != null");
+
 			_context.BuildElement = element;
 
 			foreach (var builder in builders)
@@ -534,6 +544,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		void DefineAbstractProperties()
 		{
+			Debug.Assert(_context != null, nameof(_context) + " != null");
+
 			var props = new List<PropertyInfo>();
 
 			GetAbstractProperties(_context.Type, props);
@@ -547,14 +559,13 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				var getter = pi.GetGetMethod(true);
 				var setter = pi.GetSetMethod(true);
 
-				if (getter != null && getter.IsAbstract || setter != null && setter.IsAbstract)
-				{
-					DefineAbstractGetter(pi, getter, propertyBuilders);
-					DefineAbstractSetter(pi, setter, propertyBuilders);
-				}
+				if (getter != null && getter.IsAbstract) DefineAbstractGetter(pi, getter, propertyBuilders);
+				if (setter != null && setter.IsAbstract) DefineAbstractSetter(pi, setter, propertyBuilders);
 			}
 
+#nullable disable
 			_context.CurrentProperty = null;
+#nullable restore
 		}
 
 		void DefineAbstractGetter(
@@ -564,6 +575,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			//
 			if (getter == null)
 				getter = new FakeGetter(propertyInfo);
+
+			Debug.Assert(_builders != null, nameof(_builders) + " != null");
 
 			var builders = Combine(
 				GetBuilders(getter.GetParameters()),
@@ -584,6 +597,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			//
 			if (setter == null)
 				setter = new FakeSetter(propertyInfo);
+
+			Debug.Assert(_builders != null, nameof(_builders) + " != null");
 
 			var builders = Combine(
 				GetBuilders(setter.GetParameters()),
@@ -610,6 +625,9 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		void DefineAbstractMethods()
 		{
+			Debug.Assert(_context  != null, nameof(_context) + " != null");
+			Debug.Assert(_builders != null, nameof(_builders) + " != null");
+
 			var methods = new List<MethodInfo>();
 
 			GetAbstractMethods(_context.Type, methods);
@@ -631,6 +649,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		void OverrideVirtualProperties()
 		{
+			Debug.Assert(_context != null, nameof(_context) + " != null");
+
 			var props = _context.Type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
 			foreach (var pi in props)
@@ -650,11 +670,15 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 					OverrideSetter(setter, propertyBuilders);
 			}
 
+#nullable disable
 			_context.CurrentProperty = null;
+#nullable restore
 		}
 
 		void OverrideGetter(MethodInfo getter, List<IAbstractTypeBuilder> propertyBuilders)
 		{
+			Debug.Assert(_builders != null, nameof(_builders) + " != null");
+
 			var builders = Combine(
 				GetBuilders(getter.GetParameters()),
 				GetBuilders(getter.ReturnParameter),
@@ -668,6 +692,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		void OverrideSetter(MethodInfo setter, List<IAbstractTypeBuilder> propertyBuilders)
 		{
+			Debug.Assert(_builders != null, nameof(_builders) + " != null");
+
 			var builders = Combine(
 				GetBuilders(setter.GetParameters()),
 				GetBuilders(setter.ReturnParameter),
@@ -681,6 +707,9 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		void OverrideVirtualMethods()
 		{
+			Debug.Assert(_context  != null, nameof(_context) + " != null");
+			Debug.Assert(_builders != null, nameof(_builders) + " != null");
+
 			var methods = _context.Type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
 			foreach (var method in methods)
@@ -705,6 +734,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		void DefineInterfaces()
 		{
+			Debug.Assert(_context != null, nameof(_context) + " != null");
+
 			foreach (var de in _context.InterfaceMap)
 			{
 				_context.CurrentInterface = de.Key;
@@ -734,7 +765,9 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 					EndEmitMethod();
 				}
 
+#nullable disable
 				_context.CurrentInterface = null;
+#nullable restore
 			}
 		}
 	}

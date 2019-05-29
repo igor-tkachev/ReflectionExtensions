@@ -1,5 +1,7 @@
-﻿#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
+﻿
 
+using System.Diagnostics;
+#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -42,14 +44,23 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		protected override Type GetObjectType()
 		{
+			Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
 			return IsObjectHolder? Context.CurrentProperty.PropertyType: base.GetObjectType();
 		}
 
-		protected override bool IsObjectHolder =>
-			_isObjectHolder && Context.CurrentProperty.PropertyType.IsClass;
+		protected override bool IsObjectHolder
+		{
+			get
+			{
+				Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
+				return _isObjectHolder && Context.CurrentProperty.PropertyType.IsClass;
+			}
+		}
 
 		protected override void BuildAbstractGetter()
 		{
+			Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
+
 			var field        = GetField();
 			var emit         = Context.MethodBuilder.Emitter;
 			var propertyType = Context.CurrentProperty.PropertyType;
@@ -118,11 +129,15 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 					emit.castclass(propertyType);
 			}
 
+			Debug.Assert(Context.ReturnValue != null, "Context.ReturnValue != null");
+
 			emit.stloc(Context.ReturnValue);
 		}
 
 		protected override void BuildAbstractSetter()
 		{
+			Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
+
 			var field        = GetField();
 			var emit         = Context.MethodBuilder.Emitter;
 			var propertyType = Context.CurrentProperty.PropertyType;
@@ -197,6 +212,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		MemberInfo GetGetter()
 		{
+			Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
+
 			const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance;
 
 			var propertyType = Context.CurrentProperty.PropertyType;
@@ -240,6 +257,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		MemberInfo GetSetter()
 		{
+			Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
+
 			const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance;
 
 			var propertyType = Context.CurrentProperty.PropertyType;

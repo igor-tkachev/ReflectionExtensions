@@ -32,13 +32,18 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 		private IDictionary<Type,IAbstractTypeBuilder?>? _interfaceMap;
 		public  IDictionary<Type,IAbstractTypeBuilder?>   InterfaceMap => _interfaceMap ??= new Dictionary<Type,IAbstractTypeBuilder?>();
 
-		public Type? CurrentInterface { get; set; }
+		private Type? _currentInterface;
+		public  Type   CurrentInterface
+		{
+			get => _currentInterface         ?? throw new InvalidOperationException();
+			set => _currentInterface = value;
+		}
 
 		private MethodBuilderHelper? _methodBuilder;
 		public  MethodBuilderHelper   MethodBuilder
 		{
-			get => _methodBuilder         ?? throw new InvalidOperationException();
-			set => _methodBuilder = value ?? throw new InvalidOperationException();
+			get => _methodBuilder ?? throw new InvalidOperationException();
+			set => _methodBuilder = value;
 		}
 
 		private TypeBuilderHelper? _typeBuilder;
@@ -48,19 +53,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			set => _typeBuilder = value ?? throw new InvalidOperationException();
 		}
 
-		private PropertyInfo? _currentProperty;
-		public  PropertyInfo   CurrentProperty
-		{
-			get => _currentProperty         ?? throw new InvalidOperationException();
-			set => _currentProperty = value ?? throw new InvalidOperationException();
-		}
-
-		private LocalBuilder? _returnValue;
-		public  LocalBuilder   ReturnValue
-		{
-			get => _returnValue         ?? throw new InvalidOperationException();
-			set => _returnValue = value ?? throw new InvalidOperationException();
-		}
+		public PropertyInfo? CurrentProperty { get; set; }
+		public LocalBuilder? ReturnValue     { get; set; }
 
 		[CanBeNull]
 		public T GetItem<T>(string key)
@@ -110,7 +104,18 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 		#endregion
 
 		public List<IAbstractTypeBuilder>? TypeBuilders    { get; set; }
-		public MethodInfo?                 CurrentMethod   { get; set; }
+
+		private MethodInfo? _currentMethod;
+		public  MethodInfo   CurrentMethod
+		{
+			get
+			{
+				Debug.Assert(_currentMethod != null, nameof(_currentMethod) + " != null");
+				return _currentMethod;
+			}
+
+			set => _currentMethod = value;
+		}
 
 		#region Internal Methods
 

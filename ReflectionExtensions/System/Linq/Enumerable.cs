@@ -164,6 +164,33 @@ namespace System.Linq
 
 			return dic;
 		}
+
+		/// <summary>Projects each element of a sequence to an <see cref="T:System.Collections.Generic.IEnumerable`1" /> and flattens the resulting sequences into one sequence.</summary>
+		/// <param name="source">A sequence of values to project.</param>
+		/// <param name="selector">A transform function to apply to each element.</param>
+		/// <typeparam name="TSource">The type of the elements of <paramref name="source" />.</typeparam>
+		/// <typeparam name="TResult">The type of the elements of the sequence returned by <paramref name="selector" />.</typeparam>
+		/// <returns>An <see cref="T:System.Collections.Generic.IEnumerable`1" /> whose elements are the result of invoking the one-to-many transform function on each element of the input sequence.</returns>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="source" /> or <paramref name="selector" /> is <see langword="null" />.</exception>
+		public static IEnumerable<TResult> SelectMany<TSource,TResult>(
+			this IEnumerable<TSource> source, Func<TSource, IEnumerable<TResult>> selector)
+		{
+			foreach (var item in source)
+			foreach (var result in selector(item))
+				yield return result;
+		}
+
+		/// <summary>Creates a <see cref="T:System.Collections.Generic.List`1" /> from an <see cref="T:System.Collections.Generic.IEnumerable`1" />.</summary>
+		/// <param name="source">The <see cref="T:System.Collections.Generic.IEnumerable`1" /> to create a <see cref="T:System.Collections.Generic.List`1" /> from.</param>
+		/// <typeparam name="TSource">The type of the elements of <paramref name="source" />.</typeparam>
+		/// <returns>A <see cref="T:System.Collections.Generic.List`1" /> that contains elements from the input sequence.</returns>
+		/// <exception cref="T:System.ArgumentNullException">
+		/// <paramref name="source" /> is <see langword="null" />.</exception>
+		public static List<TSource> ToList<TSource>(this IEnumerable<TSource> source)
+		{
+			return new List<TSource>(source);
+		}
 	}
 }
 

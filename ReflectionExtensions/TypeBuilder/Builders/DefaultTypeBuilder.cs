@@ -1,5 +1,7 @@
-﻿#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
+﻿
 
+using System.Diagnostics;
+#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -21,11 +23,11 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		public override bool IsApplied(BuildContext context, List<IAbstractTypeBuilder> builders)
 		{
-			if (context == null) throw new ArgumentNullException("context");
+			if (context == null) throw new ArgumentNullException(nameof(context));
 
 			if (context.IsAbstractProperty && context.IsBeforeOrBuildStep)
 			{
-				return context.CurrentProperty.GetIndexParameters().Length <= 1;
+				return context.CurrentProperty?.GetIndexParameters().Length <= 1;
 			}
 
 			return context.BuildElement == BuildElement.Type && context.IsAfterStep;
@@ -37,6 +39,9 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		protected override void BuildAbstractGetter()
 		{
+			Debug.Assert(Context.ReturnValue     != null, "Context.ReturnValue != null");
+			Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
+
 			var field = GetField();
 			var index = Context.CurrentProperty.GetIndexParameters();
 
@@ -66,6 +71,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		protected override void BuildAbstractSetter()
 		{
+			Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
+
 			var field = GetField();
 			var index = Context.CurrentProperty.GetIndexParameters();
 
@@ -150,6 +157,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		protected override void BeforeBuildAbstractSetter()
 		{
+			Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
+
 			var field = GetField();
 
 			if (field.FieldType != Context.CurrentProperty.PropertyType)
@@ -169,6 +178,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 			if (field == null)
 			{
+				Debug.Assert(propertyInfo != null, nameof(propertyInfo) + " != null");
+
 				field = Context.CreatePrivateField(propertyInfo, fieldName, fieldType);
 
 				if (TypeAccessor.IsInstanceBuildable(fieldType))
@@ -263,6 +274,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 					if (objectType.IsValueTypeEx())
 						return;
 
+					Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
+
 					var message = string.Format(
 						"Could not build the '{0}' property of the '{1}' type: type '{2}' has to have public default constructor.",
 						Context.CurrentProperty.Name,
@@ -303,7 +316,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			if (!CheckObjectHolderCtor(fieldType, objectType))
 				return;
 
-			Stack<ConstructorInfo> genericNestedConstructors;
+			Stack<ConstructorInfo>? genericNestedConstructors;
+
 			if (parameters.Length == 1)
 			{
 				var o = parameters[0];
@@ -429,7 +443,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 			// Do some heuristics for Nullable<DateTime> and EditableValue<Decimal>
 			//
-			ConstructorInfo objectCtor = null;
+			ConstructorInfo? objectCtor = null;
+
 			genericNestedConstructors = GetGenericNestedConstructors(
 				objectType,
 				type => true,
@@ -445,7 +460,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 					string.Format(types.Length == 0?
 							"Could not build the '{0}' property of the '{1}' type: type '{2}' has to have public default constructor." :
 							"Could not build the '{0}' property of the '{1}' type: type '{2}' has to have public constructor.",
-						Context.CurrentProperty.Name,
+						Context.CurrentProperty?.Name,
 						Context.Type.FullName,
 						objectType.FullName));
 			}
@@ -509,12 +524,12 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				;
 		}
 
-		Stack<ConstructorInfo> GetGenericNestedConstructors(Type objectType,
+		Stack<ConstructorInfo>? GetGenericNestedConstructors(Type objectType,
 			Predicate<Type> isActionable,
 			Action<Type>    action,
 			Func<bool>      isBreakCondition)
 		{
-			Stack<ConstructorInfo> genericNestedConstructors = null;
+			Stack<ConstructorInfo>? genericNestedConstructors = null;
 
 			if (isActionable(objectType))
 				action(objectType);
@@ -543,7 +558,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				{
 					throw new TypeBuilderException(
 						string.Format("Could not build the '{0}' property of the '{1}' type: generic type '{2}' and it's generic parameter types should have only one parameter type.",
-							Context.CurrentProperty.Name,
+							Context.CurrentProperty?.Name,
 							Context.Type.FullName,
 							objectType.FullName));
 				}
@@ -558,6 +573,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		void BuildInitContextInstance()
 		{
+			Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
+
 			var fieldName  = GetFieldName();
 			var field      = Context.GetField(fieldName);
 			var fieldType  = field.FieldType;
@@ -579,13 +596,11 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				CreateParametrizedInstance(field, fieldType, objectType, emit, parameters);
 		}
 
-		public static object[] GetPropertyParameters(PropertyInfo propertyInfo)
+		public static object[]? GetPropertyParameters(PropertyInfo propertyInfo)
 		{
-			if (propertyInfo == null) throw new ArgumentNullException("propertyInfo");
-
 			var attrs = propertyInfo.GetCustomAttributes(typeof(ParameterAttribute), true);
 
-			if (attrs != null && attrs.Length > 0)
+			if (attrs.Length > 0)
 				return ((ParameterAttribute)attrs[0]).Parameters;
 
 			attrs = propertyInfo.GetCustomAttributes(typeof(InstanceTypeAttribute), true);
@@ -603,8 +618,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			return null;
 		}
 
-
-		void CreateAbstractInitContextInstance(FieldBuilder field, Type fieldType, Type objectType, EmitHelper emit, object[] parameters)
+		void CreateAbstractInitContextInstance(FieldBuilder field, Type fieldType, Type objectType, EmitHelper emit, object[]? parameters)
 		{
 			if (!CheckObjectHolderCtor(fieldType, objectType))
 				return;
@@ -617,12 +631,15 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				Context.Items.Add("$BLToolkit.InitContext.Parent", parentField = emit.DeclareLocal(typeof(object)));
 
 				var label = emit.DefineLabel();
+				var ctor  = InitContextType.GetConstructorEx();
+
+				Debug.Assert(ctor != null, nameof(ctor) + " != null");
 
 				emit
 					.ldarg_1
 					.brtrue_s  (label)
 
-					.newobj    (InitContextType.GetConstructorEx())
+					.newobj    (ctor)
 					.starg     (1)
 
 					.ldarg_1
@@ -679,10 +696,14 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			}
 			else
 			{
+				var ctor = objectType.GetConstructorEx(typeof(InitContext));
+
+				Debug.Assert(ctor != null, nameof(ctor) + " != null");
+
 				emit
 					.ldarg_0
 					.ldarg_1
-					.newobj  (objectType.GetConstructorEx(typeof(InitContext)))
+					.newobj  (ctor)
 					;
 			}
 
@@ -704,6 +725,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		void BuildDefaultInstance()
 		{
+			Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
+
 			var fieldName  = GetFieldName();
 			var field      = Context.GetField(fieldName);
 			var fieldType  = field.FieldType;
@@ -735,7 +758,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				{
 					var message = string.Format(
 						"Could not build the '{0}' property of the '{1}' type: type '{2}' has to have constructor taking type '{3}'.",
-						Context.CurrentProperty.Name,
+						Context.CurrentProperty?.Name,
 						Context.Type.FullName,
 						fieldType.FullName,
 						objectType.FullName);
@@ -760,7 +783,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			Type         fieldType,
 			Type         objectType,
 			EmitHelper   emit,
-			object[]     parameters)
+			object[]?    parameters)
 		{
 			if (!CheckObjectHolderCtor(fieldType, objectType))
 				return;
@@ -799,10 +822,14 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			}
 			else
 			{
+				var ctor = objectType.GetConstructorEx(typeof(InitContext));
+
+				Debug.Assert(ctor != null, nameof(ctor) + " != null");
+
 				emit
 					.ldarg_0
 					.ldloc   (initField)
-					.newobj  (objectType.GetConstructorEx(typeof(InitContext)))
+					.newobj  (ctor)
 					;
 			}
 
@@ -827,8 +854,12 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			{
 				Context.Items.Add(initContextName, initField = emit.DeclareLocal(InitContextType));
 
+				var ctor = InitContextType.GetConstructorEx();
+
+				Debug.Assert(ctor != null, nameof(ctor) + " != null");
+
 				emit
-					.newobj   (InitContextType.GetConstructorEx())
+					.newobj   (ctor)
 
 					.dup
 					.ldarg_0
@@ -853,6 +884,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		bool IsLazyInstance(Type type)
 		{
+			Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
+
 			var attrs = Context.CurrentProperty.GetCustomAttributes(typeof(LazyInstanceAttribute), true);
 
 			if (attrs.Length > 0)
@@ -884,6 +917,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				.brtrue_s (end)
 				;
 
+			Debug.Assert(Context.CurrentProperty != null, "Context.CurrentProperty != null");
+
 			var parameters = GetPropertyParameters(Context.CurrentProperty);
 			var ci         = objectType.GetConstructorEx(typeof(InitContext));
 
@@ -907,15 +942,18 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			Type         fieldType,
 			Type         objectType,
 			EmitHelper   emit,
-			object[]     parameters)
+			object[]?    parameters)
 		{
 			if (!CheckObjectHolderCtor(fieldType, objectType))
 				return;
 
 			var initField = emit.DeclareLocal(InitContextType);
+			var ctor      = InitContextType.GetConstructorEx();
+
+			Debug.Assert(ctor != null, nameof(ctor) + " != null");
 
 			emit
-				.newobj   (InitContextType.GetConstructorEx())
+				.newobj   (ctor)
 
 				.dup
 				.ldarg_0
@@ -955,10 +993,14 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			}
 			else
 			{
+				ctor = objectType.GetConstructorEx(typeof(InitContext));
+
+				Debug.Assert(ctor != null, nameof(ctor) + " != null");
+
 				emit
 					.ldarg_0
 					.ldloc   (initField)
-					.newobj  (objectType.GetConstructorEx(typeof(InitContext)))
+					.newobj  (ctor)
 					;
 			}
 

@@ -1,5 +1,7 @@
-﻿#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
+﻿
 
+using System.Diagnostics;
+#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -140,6 +142,8 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 					if (targetMethod != null)
 						break;
 				}
+
+				Debug.Assert(_typeBuilder != null, nameof(_typeBuilder) + " != null");
 
 				var ips     = interfaceMethod.GetParameters();
 				var builder = _typeBuilder.DefineMethod(interfaceMethod);

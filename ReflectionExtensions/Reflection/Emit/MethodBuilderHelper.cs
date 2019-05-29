@@ -183,15 +183,21 @@ namespace ReflectionExtensions.Reflection.Emit
 		}
 
 		EmitHelper? _emitter;
+
 		/// <summary>
 		/// Gets <see cref="EmitHelper"/>.
 		/// </summary>
 		public override EmitHelper Emitter => _emitter ??= new EmitHelper(this, MethodBuilder.GetILGenerator());
 
+		MethodInfo? _overriddenMethod;
 		/// <summary>
 		/// Gets or sets the base type method overridden by this method, if any.
 		/// </summary>
-		public MethodInfo? OverriddenMethod { get; set; }
+		public MethodInfo OverriddenMethod
+		{
+			get => _overriddenMethod         ?? throw new InvalidOperationException();
+			set => _overriddenMethod = value ?? throw new InvalidOperationException();
+		}
 
 		/// <summary>
 		/// Returns the type that declares this method.

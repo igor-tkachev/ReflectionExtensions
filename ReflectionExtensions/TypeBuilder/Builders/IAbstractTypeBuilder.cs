@@ -7,15 +7,15 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 {
 	public interface IAbstractTypeBuilder
 	{
-		int    ID            { get; set; }
-		object TargetElement { get; set; }
+		int     ID            { get; set; }
+		object? TargetElement { get; set; }
 
-		Type[] GetInterfaces();
-		bool   IsCompatible (BuildContext context, IAbstractTypeBuilder typeBuilder);
+		Type[]  GetInterfaces();
+		bool    IsCompatible (BuildContext context, IAbstractTypeBuilder typeBuilder);
 
-		bool   IsApplied    (BuildContext context, List<IAbstractTypeBuilder> builders);
-		int    GetPriority  (BuildContext context);
-		void   Build        (BuildContext context);
+		bool    IsApplied    (BuildContext context, List<IAbstractTypeBuilder> builders);
+		int     GetPriority  (BuildContext context);
+		void    Build        (BuildContext context);
 	}
 }
 

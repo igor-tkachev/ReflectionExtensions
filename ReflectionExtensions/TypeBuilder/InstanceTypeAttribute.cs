@@ -17,106 +17,10 @@ namespace ReflectionExtensions.TypeBuilder
 		/// Initializes a new instance of the InstanceTypeAttribute class.
 		///</summary>
 		///<param name="instanceType">The <see cref="System.Type"/> of an instance.</param>
-		public InstanceTypeAttribute(Type instanceType)
-		{
-			InstanceType = instanceType;
-		}
-
-		///<summary>
-		/// Initializes a new instance of the InstanceTypeAttribute class.
-		///</summary>
-		///<param name="instanceType">The <see cref="System.Type"/> of an instance.</param>
-		///<param name="parameter1">An additional parameter.</param>
+		///<param name="parameters">Additional parameters.</param>
 		///<seealso cref="Parameters"/>
-		public InstanceTypeAttribute(Type instanceType, object parameter1)
+		public InstanceTypeAttribute(Type instanceType, params object[] parameters)
 		{
-			InstanceType = instanceType;
-			SetParameters(parameter1);
-		}
-
-		///<summary>
-		/// Initializes a new instance of the InstanceTypeAttribute class.
-		///</summary>
-		///<param name="instanceType">The <see cref="System.Type"/> of an instance.</param>
-		///<param name="parameter1">An additional parameter.</param>
-		///<param name="parameter2">An additional parameter.</param>
-		///<seealso cref="Parameters"/>
-		public InstanceTypeAttribute(Type instanceType,
-			object parameter1,
-			object parameter2)
-		{
-			InstanceType = instanceType;
-			SetParameters(parameter1, parameter2);
-		}
-
-		///<summary>
-		/// Initializes a new instance of the InstanceTypeAttribute class.
-		///</summary>
-		///<param name="instanceType">The <see cref="System.Type"/> of an instance.</param>
-		///<param name="parameter1">An additional parameter.</param>
-		///<param name="parameter2">An additional parameter.</param>
-		///<param name="parameter3">An additional parameter.</param>
-		///<seealso cref="Parameters"/>
-		public InstanceTypeAttribute(Type instanceType,
-			object parameter1,
-			object parameter2,
-			object parameter3)
-		{
-			InstanceType = instanceType;
-			SetParameters(parameter1, parameter2, parameter3);
-		}
-
-		///<summary>
-		/// Initializes a new instance of the InstanceTypeAttribute class.
-		///</summary>
-		///<param name="instanceType">The <see cref="System.Type"/> of an instance.</param>
-		///<param name="parameter1">An additional parameter.</param>
-		///<param name="parameter2">An additional parameter.</param>
-		///<param name="parameter3">An additional parameter.</param>
-		///<param name="parameter4">An additional parameter.</param>
-		///<seealso cref="Parameters"/>
-		public InstanceTypeAttribute(Type instanceType,
-			object parameter1,
-			object parameter2,
-			object parameter3,
-			object parameter4)
-		{
-			InstanceType = instanceType;
-			SetParameters(parameter1, parameter2, parameter3, parameter4);
-		}
-
-		///<summary>
-		/// Initializes a new instance of the InstanceTypeAttribute class.
-		///</summary>
-		///<param name="instanceType">The <see cref="System.Type"/> of an instance.</param>
-		///<param name="parameter1">An additional parameter.</param>
-		///<param name="parameter2">An additional parameter.</param>
-		///<param name="parameter3">An additional parameter.</param>
-		///<param name="parameter4">An additional parameter.</param>
-		///<param name="parameter5">An additional parameter.</param>
-		///<seealso cref="Parameters"/>
-		public InstanceTypeAttribute(Type instanceType,
-			object parameter1,
-			object parameter2,
-			object parameter3,
-			object parameter4,
-			object parameter5)
-		{
-			InstanceType = instanceType;
-			SetParameters(parameter1, parameter2, parameter3, parameter4, parameter5);
-		}
-
-		///<summary>
-		/// Initializes a new instance of the InstanceTypeAttribute class.
-		///</summary>
-		///<param name="instanceType">The <see cref="System.Type"/> of an instance.</param>
-		///<param name="parameter1">An additional parameter.</param>
-		///<param name="parameters">More additional parameters.</param>
-		///<seealso cref="Parameters"/>
-		public InstanceTypeAttribute(Type instanceType, object parameter1, params object[] parameters)
-		{
-			InstanceType = instanceType;
-
 			// Note: we can not use something like
 			// public InstanceTypeAttribute(Type instanceType, params object[] parameters)
 			// because [InstanceType(typeof(Foo), new object[] {1,2,3})] will be treated as
@@ -124,13 +28,8 @@ namespace ReflectionExtensions.TypeBuilder
 			// an instance type with array as the type of the one and only parameter.
 			// An extra parameter of type object made it successful.
 
-			var len = parameters.Length;
-
-			Array.Resize(ref parameters, len + 1);
-			Array.ConstrainedCopy(parameters, 0, parameters, 1, len);
-			parameters[0] = parameter1;
-
-			SetParameters(parameters);
+			InstanceType = instanceType;
+			Parameters   = parameters;
 		}
 
 		protected void SetParameters(params object[] parameters)
