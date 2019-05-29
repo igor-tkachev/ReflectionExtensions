@@ -223,27 +223,6 @@ namespace ReflectionExtensions.Reflection
 
 					if (type.GetConstructorEx(typeof(InitContext)) != null)
 						return true;
-
-/*
-					var ctor = type.GetConstructorEx(
-						BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
-						null,
-						new Type[0],
-						null);
-
-					if (ctor != null)
-						return true;
-
-					ctor = type.GetConstructorEx(
-						BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
-						null,
-						new Type[] { typeof(InitContext) },
-						null);
-
-					if (ctor != null)
-						return true;
-
- */
 				}
 				else
 				{
