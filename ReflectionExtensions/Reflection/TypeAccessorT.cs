@@ -35,18 +35,28 @@ namespace ReflectionExtensions.Reflection
 				type = InstanceType = (IsClassBuilderNeeded(type) ? null : type) ?? TypeFactory.GetType(type);
 #endif
 
-				var ctor = type.IsAbstractEx() ? null : type.GetDefaultConstructor();
+				var ctor  = type.IsAbstractEx() ? null : type.GetDefaultConstructor();
+				var ctor2 = type.IsAbstractEx() ? null : type.GetConstructorEx(typeof(InitContext));
 
 #if NET20 || NET30
 
 				if (ctor == null)
 				{
-					if (type.IsAbstractEx()) _createInstance = ThrowAbstractException;
+					if (type.IsAbstractEx()) {_createInstance = ThrowAbstractException;}
 					else                     _createInstance = ThrowException;
 				}
 				else
 				{
 					_createInstance = () => (T)Activator.CreateInstance(InstanceType);
+				}
+
+				if (ctor2 != null)
+				{
+					_createInstance2 = ctx => (T)Activator.CreateInstance(InstanceType, new object[] { ctx });
+				}
+				else
+				{
+					_createInstance2 = ctx => _createInstance();
 				}
 
 #else
@@ -69,6 +79,18 @@ namespace ReflectionExtensions.Reflection
 				}
 
 				_createInstance = createInstanceExpression.Compile();
+
+				if (ctor2 != null)
+				{
+					var p = Expression.Parameter(typeof(InitContext), "p");
+					var createInstanceExpression2 = Expression.Lambda<Func<InitContext,T>>(Expression.New(ctor2, p), p);
+
+					_createInstance2 = createInstanceExpression2.Compile();
+				}
+				else
+				{
+					_createInstance2 = ctx => _createInstance();
+				}
 #endif
 			}
 
@@ -156,6 +178,8 @@ namespace ReflectionExtensions.Reflection
 
 			foreach (var member in members)
 				AddMember(new MemberAccessor(this, member));
+
+			Instance = this;
 		}
 
 		static T ThrowException() =>
@@ -165,7 +189,8 @@ namespace ReflectionExtensions.Reflection
 			throw new InvalidOperationException($"Cant create an instance of abstract class '{typeof(T).FullName}'.");
 
 #nullable disable
-		static Func<T> _createInstance = () => default;
+		static Func<T>             _createInstance  = ()  => default;
+		static Func<InitContext,T> _createInstance2 = ctx => default;
 #nullable restore
 
 		/// <summary>
@@ -173,6 +198,8 @@ namespace ReflectionExtensions.Reflection
 		/// </summary>
 		/// <returns>Instance of <see cref="TypeAccessor"/>.</returns>
 		public override object CreateInstance() => _createInstance();
+
+		public override object CreateInstance(InitContext? ctx) => _createInstance2(ctx);
 
 		/// <summary>
 		/// Creates an instance of <see cref="TypeAccessor"/>.
@@ -216,5 +243,7 @@ namespace ReflectionExtensions.Reflection
 
 			return false;
 		}
+
+		public static TypeAccessor Instance { get; private set;}
 	}
 }

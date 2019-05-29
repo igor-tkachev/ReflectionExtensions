@@ -9,7 +9,7 @@ namespace ReflectionExtensions.Reflection
 	public class InitContext
 	{
 //		public object[]       MemberParameters { get; set; }
-//		public object[]       Parameters       { get; set; }
+		public object[]?      Parameters       { get; set; }
 		public bool           IsInternal       { get; set; }
 		public bool           IsLazyInstance   { get; set; }
 //		public object         Parent           { get; set; }

@@ -37,28 +37,24 @@ namespace ReflectionExtensions.Reflection
 		/// </summary>
 		/// <returns>An instance of the accessed type.</returns>
 		[Pure]
-		[DebuggerStepThrough]
 		public virtual object CreateInstance() =>
 			throw new InvalidOperationException($"The '{Type.Name}' type must have public default or init constructor.");
 
 		[Pure]
-		[DebuggerStepThrough]
 		public virtual object CreateInstance(InitContext? context)
 		{
 			return CreateInstance();
 		}
 
 		[Pure]
-		[DebuggerStepThrough]
 		public object CreateInstanceEx()
 		{
 			return ObjectFactory != null
 				? ObjectFactory.CreateInstance(this, null)
-				: CreateInstance(null);
+				: CreateInstance((InitContext?)null);
 		}
 
 		[Pure]
-		[DebuggerStepThrough]
 		public object CreateInstanceEx(InitContext context)
 		{
 			return ObjectFactory != null ? ObjectFactory.CreateInstance(this, context) : CreateInstance(context);
@@ -203,6 +199,46 @@ namespace ReflectionExtensions.Reflection
 
 		public delegate Type GetAssociatedType(Type parent);
 		public static event GetAssociatedType AssociatedTypeHandler;
+
+		public static object CreateInstance(Type type)
+		{
+			return GetAccessor(type).CreateInstance();
+		}
+
+		public static object CreateInstance(Type type, InitContext? context)
+		{
+			return GetAccessor(type).CreateInstance(context);
+		}
+
+		public static object CreateInstanceEx(Type type)
+		{
+			return GetAccessor(type).CreateInstanceEx();
+		}
+
+		public static object CreateInstanceEx(Type type, InitContext context)
+		{
+			return GetAccessor(type).CreateInstanceEx(context);
+		}
+
+		public static T CreateInstance<T>()
+		{
+			return (T)CreateInstance(typeof(T));
+		}
+
+		public static T CreateInstance<T>(InitContext context)
+		{
+			return (T)CreateInstance(typeof(T), context);
+		}
+
+		public static T CreateInstanceEx<T>()
+		{
+			return (T)CreateInstanceEx(typeof(T));
+		}
+
+		public static T CreateInstanceEx<T>(InitContext context)
+		{
+			return (T)CreateInstanceEx(typeof(T), context);
+		}
 
 		#endregion
 	}
