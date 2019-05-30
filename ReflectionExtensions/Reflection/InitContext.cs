@@ -24,14 +24,13 @@ namespace ReflectionExtensions.Reflection
 		private Dictionary<object,object>? _items;
 		public  Dictionary<object,object>   Items
 		{
-			[DebuggerStepThrough]
 			get { return _items ??= new Dictionary<object, object>(); }
 		}
 
 		public  bool  IsDestination
 		{
-			[DebuggerStepThrough] get => !IsSource;
-			[DebuggerStepThrough] set => IsSource = !value;
+			get => !IsSource;
+			set => IsSource = !value;
 		}
 	}
 }

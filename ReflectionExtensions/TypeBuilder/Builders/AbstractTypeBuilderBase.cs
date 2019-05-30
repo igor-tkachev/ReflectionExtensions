@@ -322,7 +322,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 				emit
 					.ldsfld (piField)
-					.call   (GetType().GetMethod(nameof(GetPropertyParameters)))
+					.call   (typeof(AbstractTypeBuilderBase).GetMethod(nameof(AbstractTypeBuilderBase.GetPropertyParameters)))
 					.stsfld (field)
 					;
 			}
@@ -330,7 +330,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			return field;
 		}
 
-		static object[]? GetPropertyParameters(PropertyInfo propertyInfo)
+		public static object[]? GetPropertyParameters(PropertyInfo propertyInfo)
 		{
 			if (propertyInfo == null) throw new ArgumentNullException(nameof(propertyInfo));
 

@@ -31,7 +31,7 @@ namespace ReflectionExtensions.Reflection
 
 #if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 
-				type = InstanceType = (IsClassBuilderNeeded(type) ? null : type) ?? TypeFactory.GetType(type);
+				type = InstanceType = IsClassBuilderNeeded(type) ? TypeFactory.GetType(type) : type;
 #endif
 
 				var ctor  = type.IsAbstractEx() ? null : type.GetDefaultConstructor();

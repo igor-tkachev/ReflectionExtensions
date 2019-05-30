@@ -553,6 +553,10 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 						if (isActionable(objectType))
 							action(objectType);
 					}
+					else
+					{
+						break;
+					}
 				}
 				else
 				{
@@ -596,7 +600,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				CreateParametrizedInstance(field, fieldType, objectType, emit, parameters);
 		}
 
-		public static object[]? GetPropertyParameters(PropertyInfo propertyInfo)
+		public new static object[]? GetPropertyParameters(PropertyInfo propertyInfo)
 		{
 			var attrs = propertyInfo.GetCustomAttributes(typeof(ParameterAttribute), true);
 
