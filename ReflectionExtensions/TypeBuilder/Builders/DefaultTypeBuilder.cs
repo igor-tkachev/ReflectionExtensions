@@ -789,7 +789,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				return;
 
 			var initField    = GetInitContextBuilder(initContextName, emit);
-			var memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
+			var memberParams = InitContextType.GetProperty(nameof(InitContext.MemberParameters)).GetSetMethod();
 
 			if (parameters != null)
 			{

@@ -41,7 +41,7 @@ namespace ReflectionExtensions.Reflection
 				var p = Expression.Parameter(typeof(InitContext), "p");
 #endif
 
-				switch (ctor,ctor2,type.IsAbstractEx())
+				switch (ctor, ctor2, type.IsAbstractEx())
 				{
 					case (null, null, true) :
 						_createInstance  =        ThrowAbstractException;
@@ -171,14 +171,27 @@ namespace ReflectionExtensions.Reflection
 			foreach (var member in members)
 				AddMember(new MemberAccessor(this, member));
 
-			Instance = this;
+			_instance = this;
+		}
+
+		internal TypeAccessor(TypeAccessor associatedAccessor)
+		{
+			InstanceType = associatedAccessor.InstanceType;
+
+			_createInstance  = ()  => (T)associatedAccessor.CreateInstance();
+			_createInstance2 = ctx => (T)associatedAccessor.CreateInstance(ctx);
+
+			foreach (var member in associatedAccessor.Members)
+				AddMember(member);
+
+			_instance = this;
 		}
 
 		static T ThrowException() =>
-			throw new InvalidOperationException($"The '{typeof(T).FullName}' type must have default or init constructor.");
+			throw new TypeBuilderException($"The '{typeof(T).FullName}' type must have default or init constructor.");
 
 		static T ThrowAbstractException() =>
-			throw new InvalidOperationException($"Cant create an instance of abstract class '{typeof(T).FullName}'.");
+			throw new TypeBuilderException($"Cant create an instance of abstract class '{typeof(T).FullName}'.");
 
 #nullable disable
 		static Func<T>             _createInstance  = ()  => default;
@@ -236,6 +249,7 @@ namespace ReflectionExtensions.Reflection
 			return false;
 		}
 
-		public static TypeAccessor Instance { get; private set;}
+		private static TypeAccessor<T> _instance;
+		public  static TypeAccessor<T>  Instance => _instance ??= GetAccessor<T>();
 	}
 }

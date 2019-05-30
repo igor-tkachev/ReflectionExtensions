@@ -130,7 +130,8 @@ namespace ReflectionExtensions.Reflection
 
 				accessor = (TypeAccessor)Activator.CreateInstance(accessorType, true);
 
-				_accessors[type] = accessor;
+				lock (_accessors)
+					_accessors[type] = accessor;
 
 				return accessor;
 			}
@@ -182,22 +183,36 @@ namespace ReflectionExtensions.Reflection
 			return false;
 		}
 
+		public interface ITypeAccessorCreator
+		{
+			TypeAccessor CreateTypeAccessor(TypeAccessor associatedAccessor);
+		}
+
+		public class TypeAccessorCreator<T> : ITypeAccessorCreator
+		{
+			TypeAccessor ITypeAccessorCreator.CreateTypeAccessor(TypeAccessor associatedAccessor)
+			{
+				return new TypeAccessor<T>(associatedAccessor);
+			}
+		}
+
 		public static TypeAccessor AssociateType(Type parent, Type child)
 		{
 			if (!parent.IsSameOrParentOf(child))
 				throw new ArgumentException($"'{parent}' must be a base type of '{child}'", nameof(child));
 
-			var accessor = GetAccessor(child);
-
-			accessor = (TypeAccessor)Activator.CreateInstance(accessor.GetType());
+			var accessor            = GetAccessor(child);
+			var accessorCreatorType = typeof(TypeAccessorCreator<>).MakeGenericType(parent);
+			var accessorCreator     = (ITypeAccessorCreator)Activator.CreateInstance(accessorCreatorType);
+			var parentAccessor      = accessorCreator.CreateTypeAccessor(accessor);
 
 			lock (_accessors)
-				_accessors.Add(parent, accessor);
+				_accessors[parent] = parentAccessor;
 
 			return accessor;
 		}
 
-		public delegate Type GetAssociatedType(Type parent);
+		public delegate Type? GetAssociatedType(Type parent);
 		public static event GetAssociatedType AssociatedTypeHandler;
 
 		public static object CreateInstance(Type type)

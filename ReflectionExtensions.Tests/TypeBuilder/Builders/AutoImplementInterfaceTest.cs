@@ -1,44 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 
 using NUnit.Framework;
 
 namespace ReflectionExtensions.Tests.TypeBuilder.Builders
 {
-	using ReflectionExtensions.Mapping;
 	using ReflectionExtensions.Reflection;
 	using ReflectionExtensions.TypeBuilder;
 
 	[TestFixture]
 	public class AutoImplementInterfaceTest
 	{
-		#region Test
-
-		[AutoImplementInterface]
-		public interface Test1
-		{
-			string Name { get; }
-		}
-
-		[Test]
-		public void Test()
-		{
-			TypeAccessor ta = TypeAccessor.GetAccessor(typeof(Test1));
-			Test1 t = (Test1)ta.CreateInstance();
-
-			Dictionary<string, object> dic = new Dictionary<string,object>();
-
-			dic.Add("Name", "John");
-
-			Map.MapSourceToDestination(
-				Map.DefaultSchema.CreateDictionaryMapper(dic), dic,
-				Map.GetObjectMapper(t.GetType()), t);
-
-			Assert.AreEqual("John", t.Name);
-		}
-
-		#endregion
-
 		#region TestException
 
 		public interface Test2
@@ -46,11 +17,14 @@ namespace ReflectionExtensions.Tests.TypeBuilder.Builders
 			string Name { get; }
 		}
 
-		[Test, ExpectedException(typeof(TypeBuilderException))]
+		[Test]
 		public void TestException()
 		{
-			TypeAccessor ta = TypeAccessor.GetAccessor(typeof(Test2));
-			Test2 t = (Test2)ta.CreateInstance();
+			Assert.Throws<TypeBuilderException>(() =>
+			{
+				var ta = TypeAccessor.GetAccessor(typeof(Test2));
+				var t  = (Test2)ta.CreateInstance();
+			});
 		}
 
 		#endregion
@@ -69,15 +43,19 @@ namespace ReflectionExtensions.Tests.TypeBuilder.Builders
 			Test3 Test { get; }
 		}
 
+#if !NETCOREAPP1_0
+
 		[Test]
 		public void TestMemberImpl()
 		{
-			Test4 t = TypeAccessor<Test4>.CreateInstance();
+			var t = TypeAccessor<Test4>.Instance.Create();
 
 			t.Test.Name = "John";
 
 			Assert.AreEqual("John", t.Test.Name);
 		}
+
+#endif
 
 		#endregion
 
@@ -85,7 +63,7 @@ namespace ReflectionExtensions.Tests.TypeBuilder.Builders
 
 		public interface InterfaceBase
 		{
-			string Name { get; set; }
+			string? Name { get; set; }
 		}
 
 		public interface Interface1 : InterfaceBase
@@ -99,12 +77,14 @@ namespace ReflectionExtensions.Tests.TypeBuilder.Builders
 			void Bar();
 		}
 
+#if !NETCOREAPP1_0
+
 		[Test]
 		public void TestInheritance()
 		{
 			//TypeFactory.SaveTypes = true;
 
-			Interface2 i2 = TypeAccessor<Interface2>.CreateInstance();
+			Interface2 i2 = TypeAccessor<Interface2>.Instance.Create();
 			Interface1 i1 = i2;
 
 			i1.Foo();
@@ -117,6 +97,8 @@ namespace ReflectionExtensions.Tests.TypeBuilder.Builders
 			Assert.AreEqual("John", i2.Name);
 		}
 
+#endif
+
 		#endregion
 
 		#region AssociateTypeTest
@@ -125,14 +107,9 @@ namespace ReflectionExtensions.Tests.TypeBuilder.Builders
 		{
 			public void Foo() {}
 
-			private string _name;
-			public  string  Name
-			{
-				get { return _name;  }
-				set { _name = value; }
-			}
+			public string? Name { get; set; }
 
-			public string Address;
+			public string? Address;
 		}
 
 		[Test]
@@ -140,12 +117,12 @@ namespace ReflectionExtensions.Tests.TypeBuilder.Builders
 		{
 			TypeAccessor.AssociateType(typeof(Interface1), typeof(MyClass));
 
-			Interface1 i1 = TypeAccessor<Interface1>.CreateInstance();
+			Interface1 i1 = TypeAccessor<Interface1>.Instance.Create();
 
 			i1.Name = "John";
 
 			Assert.AreEqual("John", i1.Name);
-			Assert.AreEqual("John", TypeAccessor<Interface1>.Instance["Name"].GetValue(i1).ToString());
+			Assert.AreEqual("John", TypeAccessor<Interface1>.Instance[nameof(Interface1.Name)].GetValue(i1)?.ToString());
 		}
 
 		#endregion
@@ -154,35 +131,26 @@ namespace ReflectionExtensions.Tests.TypeBuilder.Builders
 
 		public interface IMy
 		{
-			string Name { get; set; }
+			string? Name { get; set; }
 		}
 
 		public class MyImpl : IMy
 		{
-			private string _name;
-			public  string  Name
-			{
-				get { return _name;  }
-				set { _name = value; }
-			}
+			public string? Name { get; set; }
 		}
 
 
 		[Test]
 		public void AssociateTypeHandlerTest()
 		{
-			TypeAccessor.AssociatedTypeHandler += delegate(Type parent)
-			{
-				if (parent == typeof(IMy)) return typeof(MyImpl);
-				return null;
-			};
+			TypeAccessor.AssociatedTypeHandler += parent => parent == typeof(IMy) ? typeof(MyImpl) : null;
 
-			IMy i = TypeAccessor<IMy>.CreateInstance();
+			var i = TypeAccessor<IMy>.Instance.Create();
 
 			i.Name = "John";
 
 			Assert.AreEqual("John", i.Name);
-			Assert.AreEqual("John", TypeAccessor<IMy>.Instance["Name"].GetValue(i).ToString());
+			Assert.AreEqual("John", TypeAccessor<IMy>.Instance[nameof(IMy.Name)].GetValue(i)?.ToString());
 		}
 
 		#endregion

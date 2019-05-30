@@ -1,4 +1,8 @@
-﻿using NUnit.Framework;
+﻿#if !NETCOREAPP1_0
+
+using System;
+
+using NUnit.Framework;
 
 namespace ReflectionExtensions.Tests.TypeBuilder.Builders
 {
@@ -29,3 +33,5 @@ namespace ReflectionExtensions.Tests.TypeBuilder.Builders
 		}
 	}
 }
+
+#endif
