@@ -82,8 +82,6 @@ namespace ReflectionExtensions.Tests.TypeBuilder.Builders
 		[Test]
 		public void TestInheritance()
 		{
-			//TypeFactory.SaveTypes = true;
-
 			Interface2 i2 = TypeAccessor<Interface2>.Instance.Create();
 			Interface1 i1 = i2;
 
