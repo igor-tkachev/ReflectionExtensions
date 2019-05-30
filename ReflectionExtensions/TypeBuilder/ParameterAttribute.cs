@@ -10,41 +10,41 @@ namespace ReflectionExtensions.TypeBuilder
 			Parameters = new object[0];
 		}
 
-		public ParameterAttribute(object parameter1)
+		public ParameterAttribute(object? parameter1)
 		{
 			Parameters = new[] { parameter1 };
 		}
 
 		public ParameterAttribute(
-			object parameter1,
-			object parameter2)
+			object? parameter1,
+			object? parameter2)
 		{
 			Parameters = new[] { parameter1, parameter2 };
 		}
 
 		public ParameterAttribute(
-			object parameter1,
-			object parameter2,
-			object parameter3)
+			object? parameter1,
+			object? parameter2,
+			object? parameter3)
 		{
 			Parameters = new[] { parameter1, parameter2, parameter3 };
 		}
 
 		public ParameterAttribute(
-			object parameter1,
-			object parameter2,
-			object parameter3,
-			object parameter4)
+			object? parameter1,
+			object? parameter2,
+			object? parameter3,
+			object? parameter4)
 		{
 			Parameters = new[] { parameter1, parameter2, parameter3, parameter4 };
 		}
 
 		public ParameterAttribute(
-			object parameter1,
-			object parameter2,
-			object parameter3,
-			object parameter4,
-			object parameter5)
+			object? parameter1,
+			object? parameter2,
+			object? parameter3,
+			object? parameter4,
+			object? parameter5)
 		{
 			Parameters = new[] { parameter1, parameter2, parameter3, parameter4, parameter5 };
 		}
@@ -54,6 +54,6 @@ namespace ReflectionExtensions.TypeBuilder
 			Parameters = parameters;
 		}
 
-		public object[] Parameters { get; set; }
+		public object?[] Parameters { get; set; }
 	}
 }

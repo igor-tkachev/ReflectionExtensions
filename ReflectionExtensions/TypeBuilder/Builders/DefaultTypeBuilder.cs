@@ -311,7 +311,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 		}
 
 		void CreateParametrizedInstance(
-			FieldBuilder field, Type fieldType, Type objectType, EmitHelper emit, object[] parameters)
+			FieldBuilder field, Type fieldType, Type objectType, EmitHelper emit, object?[] parameters)
 		{
 			if (!CheckObjectHolderCtor(fieldType, objectType))
 				return;
@@ -431,9 +431,11 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 			for (var i = 0; i < parameters.Length; i++)
 			{
-				if (parameters[i] != null)
+				var p = parameters[i];
+
+				if (p != null)
 				{
-					var t = parameters[i].GetType();
+					var t = p.GetType();
 
 					types[i] = (t.IsEnum) ? Enum.GetUnderlyingType(t) : t;
 				}
@@ -472,6 +474,9 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			for (var i = 0; i < parameters.Length; i++)
 			{
 				var o     = parameters[i];
+
+				Debug.Assert(o != null, nameof(o) + " != null");
+
 				var oType = o.GetType();
 
 				if (emit.LoadWellKnownValue(o))
@@ -600,7 +605,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				CreateParametrizedInstance(field, fieldType, objectType, emit, parameters);
 		}
 
-		public new static object[]? GetPropertyParameters(PropertyInfo propertyInfo)
+		public new static object?[]? GetPropertyParameters(PropertyInfo propertyInfo)
 		{
 			var attrs = propertyInfo.GetCustomAttributes(typeof(ParameterAttribute), true);
 
@@ -622,7 +627,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			return null;
 		}
 
-		void CreateAbstractInitContextInstance(FieldBuilder field, Type fieldType, Type objectType, EmitHelper emit, object[]? parameters)
+		void CreateAbstractInitContextInstance(FieldBuilder field, Type fieldType, Type objectType, EmitHelper emit, object?[]? parameters)
 		{
 			if (!CheckObjectHolderCtor(fieldType, objectType))
 				return;
@@ -787,7 +792,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			Type         fieldType,
 			Type         objectType,
 			EmitHelper   emit,
-			object[]?    parameters)
+			object?[]?   parameters)
 		{
 			if (!CheckObjectHolderCtor(fieldType, objectType))
 				return;
@@ -946,7 +951,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			Type         fieldType,
 			Type         objectType,
 			EmitHelper   emit,
-			object[]?    parameters)
+			object?[]?   parameters)
 		{
 			if (!CheckObjectHolderCtor(fieldType, objectType))
 				return;

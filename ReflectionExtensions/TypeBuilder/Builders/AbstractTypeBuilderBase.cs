@@ -330,7 +330,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			return field;
 		}
 
-		public static object[]? GetPropertyParameters(PropertyInfo propertyInfo)
+		public static object?[]? GetPropertyParameters(PropertyInfo propertyInfo)
 		{
 			if (propertyInfo == null) throw new ArgumentNullException(nameof(propertyInfo));
 
