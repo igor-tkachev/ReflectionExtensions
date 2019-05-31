@@ -13,6 +13,9 @@
 		<DelaySign>False</DelaySign>
 		<AssemblyOriginatorKeyFile>..\Build\ReflectionExtensions.snk</AssemblyOriginatorKeyFile>
 		<Version>1.0.0.1</Version>
+		<RepositoryType>git</RepositoryType>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)'=='netcoreapp1.0' OR '$(TargetFramework)'=='netcoreapp1.1' OR '$(TargetFramework)'=='netstandard1.5' OR '$(TargetFramework)'=='netstandard1.6' ">
