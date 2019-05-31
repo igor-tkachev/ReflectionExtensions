@@ -559,8 +559,12 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				var getter = pi.GetGetMethod(true);
 				var setter = pi.GetSetMethod(true);
 
-				if (getter != null && getter.IsAbstract) DefineAbstractGetter(pi, getter, propertyBuilders);
-				if (setter != null && setter.IsAbstract) DefineAbstractSetter(pi, setter, propertyBuilders);
+				if (getter != null && getter.IsAbstract ||
+					setter != null && setter.IsAbstract)
+				{
+					DefineAbstractGetter(pi, getter, propertyBuilders);
+					DefineAbstractSetter(pi, setter, propertyBuilders);
+				}
 			}
 
 #nullable disable
@@ -569,7 +573,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 		}
 
 		void DefineAbstractGetter(
-			PropertyInfo propertyInfo, MethodInfo getter, List<IAbstractTypeBuilder> propertyBuilders)
+			PropertyInfo propertyInfo, MethodInfo? getter, List<IAbstractTypeBuilder> propertyBuilders)
 		{
 			// Getter can be not defined. We will generate it anyway.
 			//
@@ -589,9 +593,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 		}
 
 		void DefineAbstractSetter(
-			PropertyInfo               propertyInfo,
-			MethodInfo                 setter,
-			List<IAbstractTypeBuilder> propertyBuilders)
+			PropertyInfo propertyInfo, MethodInfo? setter, List<IAbstractTypeBuilder> propertyBuilders)
 		{
 			// Setter can be not defined. We will generate it anyway.
 			//

@@ -90,32 +90,31 @@ namespace ReflectionExtensions.Reflection
 
 #if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARDLESS1_6
 
-			foreach (var memberInfo in type.GetMembersEx())
-			{
-				switch (memberInfo)
-				{
-					case FieldInfo f when !f.IsStatic && f.IsPublic :
-						members.Add(memberInfo);
-						break;
-
-					case PropertyInfo p when !p.GetMethod.IsStatic && p.GetMethod.IsPublic && p.GetIndexParameters().Length == 0 :
-						members.Add(memberInfo);
-						break;
-				}
-			}
+			var memberInfos = type.GetMembersEx();
 
 #else
 
-			foreach (var memberInfo in type.GetMembersEx(BindingFlags.Instance | BindingFlags.Public))
-			{
-				if (memberInfo.MemberType == MemberTypes.Field ||
-					memberInfo.MemberType == MemberTypes.Property && ((PropertyInfo)memberInfo).GetIndexParameters().Length == 0)
-				{
-					members.Add(memberInfo);
-				}
-			}
+			var memberInfos = type.GetMembersEx(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
 #endif
+
+			foreach (var memberInfo in memberInfos)
+			{
+				switch (memberInfo)
+				{
+					case FieldInfo    fi when fi.IsPublic && !fi.IsStatic:
+						members.Add(memberInfo);
+						break;
+					case PropertyInfo pi when pi.GetIndexParameters().Length == 0:
+
+						var m = pi.GetGetMethodEx(true) ?? pi.GetSetMethodEx(true);
+
+						if (m != null && m.IsPublic && !m.IsStatic)
+							members.Add(memberInfo);
+
+						break;
+				}
+			}
 
 			// Add explicit interface implementation properties support
 			// Or maybe we should support all private fields/properties?
@@ -170,6 +169,13 @@ namespace ReflectionExtensions.Reflection
 
 			foreach (var member in members)
 				AddMember(new MemberAccessor(this, member));
+
+			// ObjectFactory
+			//
+			var attr = type.GetCustomAttributeEx<ObjectFactoryAttribute>();
+
+			if (attr != null)
+				ObjectFactory = attr.ObjectFactory;
 
 			_instance = this;
 		}

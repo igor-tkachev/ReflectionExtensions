@@ -66,17 +66,17 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		public override object[] GetCustomAttributes(bool inherit)
 		{
-			throw new NotImplementedException();
+			return _customAttributeProvider.GetCustomAttributes(inherit);
 		}
 
 		public override bool IsDefined(Type attributeType, bool inherit)
 		{
-			throw new NotImplementedException();
+			return _customAttributeProvider.IsDefined(attributeType, inherit);
 		}
 
 		public override object[] GetCustomAttributes(Type attributeType, bool inherit)
 		{
-			throw new NotImplementedException();
+			return _customAttributeProvider.GetCustomAttributes(attributeType, inherit);
 		}
 
 		public override Type                ReflectedType { get; }

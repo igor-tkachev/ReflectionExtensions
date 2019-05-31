@@ -217,6 +217,9 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 		{
 			var fieldName  = GetFieldName();
 			var field      = Context.GetField(fieldName);
+
+			Debug.Assert(field != null, nameof(field) + " != null");
+
 			var fieldType  = field.FieldType;
 			var objectType = GetObjectType();
 
@@ -586,6 +589,9 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 			var fieldName  = GetFieldName();
 			var field      = Context.GetField(fieldName);
+
+			Debug.Assert(field != null, nameof(field) + " != null");
+
 			var fieldType  = field.FieldType;
 			var objectType = GetObjectType();
 
@@ -738,6 +744,9 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 			var fieldName  = GetFieldName();
 			var field      = Context.GetField(fieldName);
+
+			Debug.Assert(field != null, nameof(field) + " != null");
+
 			var fieldType  = field.FieldType;
 			var objectType = GetObjectType();
 
@@ -913,6 +922,9 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 		{
 			var fieldName  = GetFieldName();
 			var field      = Context.GetField(fieldName);
+
+			Debug.Assert(field != null, nameof(field) + " != null");
+
 			var fieldType  = field.FieldType;
 			var objectType = GetObjectType();
 			var ensurer    = Context.TypeBuilder.DefineMethod($"$EnsureInstance{fieldName}", MethodAttributes.Private | MethodAttributes.HideBySig);

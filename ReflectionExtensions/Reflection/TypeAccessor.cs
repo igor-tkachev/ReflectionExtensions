@@ -11,7 +11,7 @@ namespace ReflectionExtensions.Reflection
 	/// <summary>
 	/// Provides fast access to type and its members.
 	/// </summary>
-	[DebuggerDisplay("Type = {Type}, OriginalType = {OriginalType}")]
+	[DebuggerDisplay("Type = {Type}, InstanceType = {InstanceType}")]
 	[PublicAPI]
 	public abstract class TypeAccessor
 	{
@@ -96,6 +96,8 @@ namespace ReflectionExtensions.Reflection
 		/// <param name="memberName">Member name.</param>
 		/// <returns>Instance of <see cref="MemberAccessor"/>.</returns>
 		public MemberAccessor this[[NotNull] string memberName] => _membersByName[memberName];
+
+		public bool HasMember([NotNull] string memberName) => _membersByName.ContainsKey(memberName);
 
 		/// <summary>
 		/// Returns <see cref="MemberAccessor"/> by index.

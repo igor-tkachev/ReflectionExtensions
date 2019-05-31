@@ -13,7 +13,6 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 	using Reflection.Emit;
 
 	[PublicAPI]
-	[DebuggerStepThrough]
 	public class BuildContext
 	{
 		public BuildContext(Type type)
@@ -119,7 +118,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		#region Internal Methods
 
-		public FieldBuilder GetField(string fieldName)
+		public FieldBuilder? GetField(string fieldName)
 		{
 			return GetItem<FieldBuilder>("$BLToolkit.Field." + fieldName);
 		}

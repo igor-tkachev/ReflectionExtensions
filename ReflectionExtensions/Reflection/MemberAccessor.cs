@@ -81,7 +81,7 @@ namespace ReflectionExtensions.Reflection
 				var getter   = Expression.Lambda<Func<object,object?>>(
 					Expression.Convert(
 						Expression.MakeMemberAccess(
-							Expression.Convert(objParam, TypeAccessor.Type),
+							Expression.Convert(objParam, TypeAccessor.InstanceType),
 							memberInfo),
 						typeof(object)),
 					objParam);
@@ -92,6 +92,35 @@ namespace ReflectionExtensions.Reflection
 			else
 			{
 				_getter = o => null;
+
+				if (propertyInfo != null && typeAccessor.Type != typeAccessor.InstanceType)
+				{
+					var getMethod = typeAccessor.InstanceType.GetMethodEx("get_" + propertyInfo.Name);
+
+					if (getMethod != null)
+					{
+						HasGetter = true;
+
+#if NET20 || NET30
+
+						_getter = o => getMethod.Invoke(o, new object[0]);
+
+#else
+
+						var objParam = Expression.Parameter(typeof(object), "obj");
+						var getter   = Expression.Lambda<Func<object,object?>>(
+							Expression.Convert(
+								Expression.Call(
+									Expression.Convert(objParam, TypeAccessor.InstanceType),
+									getMethod),
+								typeof(object)),
+							objParam);
+
+						_getter = getter.Compile();
+
+#endif
+					}
+				}
 			}
 
 			if (HasSetter)
@@ -115,7 +144,7 @@ namespace ReflectionExtensions.Reflection
 				var setter     = Expression.Lambda<Action<object,object?>>(
 					Expression.Assign(
 						Expression.MakeMemberAccess(
-							Expression.Convert(objParam, TypeAccessor.Type),
+							Expression.Convert(objParam, TypeAccessor.InstanceType),
 							memberInfo),
 						Expression.Convert(valueParam, Type)),
 					objParam,
@@ -128,6 +157,36 @@ namespace ReflectionExtensions.Reflection
 			else
 			{
 				_setter = (o,v) => { };
+
+				if (propertyInfo != null && typeAccessor.Type != typeAccessor.InstanceType)
+				{
+					var setMethod = typeAccessor.InstanceType.GetMethodEx("set_" + propertyInfo.Name);
+
+					if (setMethod != null)
+					{
+						HasSetter = true;
+
+#if NET20 || NET30 || NET35
+
+						_setter = (o,v) => setMethod.Invoke(o, new object?[] { v });
+
+#else
+
+						var objParam   = Expression.Parameter(typeof(object), "obj");
+						var valueParam = Expression.Parameter(typeof(object?), "valueParam");
+						var setter     = Expression.Lambda<Action<object,object?>>(
+							Expression.Call(
+								Expression.Convert(objParam, TypeAccessor.InstanceType),
+								setMethod,
+								Expression.Convert(valueParam, Type)),
+							objParam,
+							valueParam);
+
+						_setter = setter.Compile();
+
+#endif
+					}
+				}
 			}
 		}
 
