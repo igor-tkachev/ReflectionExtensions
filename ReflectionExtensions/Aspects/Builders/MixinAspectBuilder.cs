@@ -34,7 +34,7 @@ namespace ReflectionExtensions.Aspects.Builders
 
 		public override Type[] GetInterfaces()
 		{
-			return new Type[] { _targetInterface };
+			return new[] { _targetInterface };
 		}
 
 		public override void Build(BuildContext context)
@@ -47,8 +47,7 @@ namespace ReflectionExtensions.Aspects.Builders
 			var emit   = Context.MethodBuilder.Emitter;
 			var method = Context.MethodBuilder.OverriddenMethod;
 			var ps     = method.GetParameters();
-			var field  = Context.Type.GetField(_memberName);
-
+			var field  = Context.Type.GetFieldEx(_memberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
 			Type memberType;
 
@@ -73,23 +72,21 @@ namespace ReflectionExtensions.Aspects.Builders
 			}
 			else
 			{
-				var prop = Context.Type.GetProperty(_memberName);
+				var prop = Context.Type.GetPropertyEx(_memberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
 				if (prop != null)
 				{
-					MethodInfo mi = prop.GetGetMethod(true);
+					var mi = prop.GetGetMethod(true);
 
 					if (mi == null)
-						throw new TypeBuilderException(string.Format(
-							"Property '{0}.{1}' getter not found.",
-							Context.Type.Name, _memberName));
+						throw new TypeBuilderException(
+							$"Property '{Context.Type.Name}.{_memberName}' getter not found.");
 
 					memberType = prop.PropertyType;
 
 					if (mi.IsPrivate)
-						throw new TypeBuilderException(string.Format(
-							"Property '{0}.{1}' getter must be protected or public.",
-							Context.Type.Name, _memberName));
+						throw new TypeBuilderException(
+							$"Property '{Context.Type.Name}.{_memberName}' getter must be protected or public.");
 
 					emit
 						.ldarg_0
@@ -105,9 +102,7 @@ namespace ReflectionExtensions.Aspects.Builders
 				}
 				else
 				{
-					throw new TypeBuilderException(string.Format(
-						"Member '{0}.{1}' not found.",
-						Context.Type.Name, _memberName));
+					throw new TypeBuilderException($"Member '{Context.Type.Name}.{_memberName}' not found.");
 				}
 			}
 
@@ -122,7 +117,7 @@ namespace ReflectionExtensions.Aspects.Builders
 				emit.stloc(Context.ReturnValue);
 		}
 
-		private void CheckNull(EmitHelper emit)
+		void CheckNull(EmitHelper emit)
 		{
 			if (_throwExceptionIfNull == false && string.IsNullOrEmpty(_exceptionMessage))
 			{
@@ -132,12 +127,12 @@ namespace ReflectionExtensions.Aspects.Builders
 			}
 			else
 			{
-				string message = string.Format(
+				var message = string.Format(
 					string.IsNullOrEmpty(_exceptionMessage)?
 						"'{0}.{1}' is not initialized." : _exceptionMessage,
 					_targetInterface.Name, _memberName, _targetInterface.FullName);
 
-				Label label = emit.DefineLabel();
+				var label = emit.DefineLabel();
 
 				emit
 					.brtrue    (label)
@@ -171,8 +166,7 @@ namespace ReflectionExtensions.Aspects.Builders
 						attr.TargetInterface != Context.CurrentInterface)
 						continue;
 
-					string name = string.IsNullOrEmpty(attr.MethodName)?
-						mi.Name: attr.MethodName;
+					var name = string.IsNullOrEmpty(attr.MethodName) ? mi.Name : attr.MethodName;
 
 					if (name != method.Name || mi.ReturnType != method.ReturnType)
 						continue;

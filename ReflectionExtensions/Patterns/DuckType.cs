@@ -2,9 +2,6 @@
 
 namespace ReflectionExtensions.Patterns
 {
-	/// <summary>
-	/// Reserved to internal BLToolkit use.
-	/// </summary>
 	public abstract class DuckType
 	{
 		// This column must be protected. Do not change.

@@ -6,18 +6,11 @@ namespace ReflectionExtensions.Aspects
 {
 	public class CacheAspectItem
 	{
-		private        DateTime _maxCacheTime;
-		public virtual DateTime  MaxCacheTime
-		{
-			get => _maxCacheTime;
-			set => _maxCacheTime = value;
-		}
+		public virtual DateTime MaxCacheTime { get; set; }
+		public virtual bool     IsExpired => MaxCacheTime <= DateTime.Now;
 
-		public  object?   ReturnValue { get; set; }
-
-		public  object[]? RefValues { get; set; }
-
-		public virtual bool IsExpired => _maxCacheTime <= DateTime.Now;
+		public object?       ReturnValue { get; set; }
+		public object[]?     RefValues   { get; set; }
 	}
 }
 

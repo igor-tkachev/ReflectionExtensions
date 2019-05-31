@@ -6,9 +6,6 @@ namespace ReflectionExtensions.Aspects
 {
 	using TypeBuilder.Builders;
 
-	/// <summary>
-	/// http://www.bltoolkit.net/Doc/Aspects/index.htm
-	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple=true)]
 	public sealed class MixinAttribute : AbstractTypeBuilderAttribute
 	{

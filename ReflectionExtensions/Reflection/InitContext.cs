@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
-//using BLToolkit.Mapping;
 
 namespace ReflectionExtensions.Reflection
 {
@@ -17,9 +15,9 @@ namespace ReflectionExtensions.Reflection
 //		public ObjectMapper   ObjectMapper     { get; set; }
 //		public MappingSchema  MappingSchema    { get; set; }
 		public bool           IsSource         { get; set; }
-		public bool           StopMapping      { get; set; }
+//		public bool           StopMapping      { get; set; }
 //		public IMapDataSource DataSource       { get; set; }
-		public bool           IsLinqSource     { get; set; }
+//		public bool           IsLinqSource     { get; set; }
 
 		private Dictionary<object,object>? _items;
 		public  Dictionary<object,object>   Items
@@ -27,7 +25,7 @@ namespace ReflectionExtensions.Reflection
 			get { return _items ??= new Dictionary<object, object>(); }
 		}
 
-		public  bool  IsDestination
+		public bool IsDestination
 		{
 			get => !IsSource;
 			set => IsSource = !value;

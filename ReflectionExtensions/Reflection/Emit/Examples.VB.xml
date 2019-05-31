@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <examples>
 
 <emit name="Emit">
@@ -7,8 +7,8 @@
 Imports System
 Imports NUnit.Framework
 
-Imports BLToolkit.Reflection
-Imports BLToolkit.Reflection.Emit
+Imports ReflectionExtensions.Reflection
+Imports ReflectionExtensions.Reflection.Emit
 
 Namespace Examples.Reflection.Emit
 

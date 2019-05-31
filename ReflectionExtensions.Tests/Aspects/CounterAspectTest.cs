@@ -32,24 +32,24 @@ namespace ReflectionExtensions.Tests.Aspects
 		[Test]
 		public void Test()
 		{
-			TestClass t = (TestClass)TypeAccessor.CreateInstance(typeof(TestClass));
+			var t = (TestClass)TypeAccessor.CreateInstance(typeof(TestClass));
 
-			for (int i = 0; i < 10; i++)
+			for (var i = 0; i < 10; i++)
 				t.Test();
 
-			MethodCallCounter counter = CounterAspect.GetCounter(typeof(TestClass).GetMethod("Test"));
+			var counter = CounterAspect.GetCounter(typeof(TestClass).GetMethod("Test"));
 
-			Assert.AreEqual(10, counter.TotalCount);
+			Assert.AreEqual(10, counter?.TotalCount);
 
-			Console.WriteLine(counter.TotalTime);
+			Console.WriteLine(counter?.TotalTime);
 
-			new Thread(new ThreadStart(t.LongTest)).Start();
+			new Thread(t.LongTest).Start();
 			Thread.Sleep(20);
 
 			lock (CounterAspect.Counters.SyncRoot) foreach (MethodCallCounter c in CounterAspect.Counters)
 			{
 				Console.WriteLine("{0}.{1,-10} | {2,2} | {3,2} | {4}",
-					c.MethodInfo.DeclaringType.Name,
+					c.MethodInfo.DeclaringType?.Name,
 					c.MethodInfo.Name,
 					c.TotalCount,
 					c.CurrentCalls.Count,

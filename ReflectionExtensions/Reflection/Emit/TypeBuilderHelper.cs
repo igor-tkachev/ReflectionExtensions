@@ -31,7 +31,7 @@ namespace ReflectionExtensions.Reflection.Emit
 			Assembly    = assemblyBuilder ?? throw new ArgumentNullException(nameof(assemblyBuilder));
 			TypeBuilder = typeBuilder     ?? throw new ArgumentNullException(nameof(typeBuilder));
 
-			TypeBuilder.SetCustomAttribute(Assembly.BLToolkitAttribute);
+			TypeBuilder.SetCustomAttribute(Assembly.ReflectionExtensionsAttribute);
 		}
 
 		/// <summary>
@@ -214,7 +214,7 @@ namespace ReflectionExtensions.Reflection.Emit
 			// and the following condition should have been used below:
 			// if ((methodInfoDeclaration is FakeMethodInfo) == false)
 			//
-			if (methodInfoDeclaration.DeclaringType.IsInterface && !(methodInfoDeclaration is FakeMethodInfo))
+			if (methodInfoDeclaration.DeclaringType?.IsInterface == true && !(methodInfoDeclaration is FakeMethodInfo))
 			{
 				OverriddenMethods.Add(methodInfoDeclaration, method.MethodBuilder);
 				TypeBuilder.DefineMethodOverride(method.MethodBuilder, methodInfoDeclaration);
@@ -248,11 +248,11 @@ namespace ReflectionExtensions.Reflection.Emit
 		{
 			if (methodInfoDeclaration == null) throw new ArgumentNullException(nameof(methodInfoDeclaration));
 
-			var isInterface = methodInfoDeclaration.DeclaringType.IsInterface;
+			var isInterface = methodInfoDeclaration.DeclaringType?.IsInterface == true;
 			var isFake      = methodInfoDeclaration is FakeMethodInfo;
 
 			var name = isInterface && !isFake?
-				methodInfoDeclaration.DeclaringType.FullName + "." + methodInfoDeclaration.Name:
+				methodInfoDeclaration.DeclaringType?.FullName + "." + methodInfoDeclaration.Name:
 				methodInfoDeclaration.Name;
 
 			var attributes =

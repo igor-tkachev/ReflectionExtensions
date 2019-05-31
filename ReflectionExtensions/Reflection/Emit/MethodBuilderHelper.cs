@@ -29,7 +29,7 @@ namespace ReflectionExtensions.Reflection.Emit
 			: base(typeBuilder)
 		{
 			MethodBuilder = methodBuilder;
-			methodBuilder.SetCustomAttribute(Type.Assembly.BLToolkitAttribute);
+			methodBuilder.SetCustomAttribute(Type.Assembly.ReflectionExtensionsAttribute);
 		}
 
 		/// <summary>
@@ -140,7 +140,7 @@ namespace ReflectionExtensions.Reflection.Emit
 
 			// Once all generic stuff is done is it is safe to call SetCustomAttribute
 			//
-			methodBuilder.SetCustomAttribute(Type.Assembly.BLToolkitAttribute);
+			methodBuilder.SetCustomAttribute(Type.Assembly.ReflectionExtensionsAttribute);
 		}
 
 		static Type TranslateGenericParameters(Type type, GenericTypeParameterBuilder[] typeArguments)

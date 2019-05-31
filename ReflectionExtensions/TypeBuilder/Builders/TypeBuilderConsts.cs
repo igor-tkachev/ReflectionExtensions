@@ -16,7 +16,6 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			public const int ClearCacheAspect = Normal;
 			public const int LoggingAspect    = Normal;
 			public const int CacheAspect      = Low;
-			public const int DataAccessor     = Low;
 			public const int PropChange       = int.MinValue + 1000000;
 		}
 

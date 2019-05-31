@@ -8,16 +8,15 @@ namespace ReflectionExtensions.Tests.Aspects
 {
 	using ReflectionExtensions.Aspects;
 	using ReflectionExtensions.Reflection;
-	using ReflectionExtensions.TypeBuilder;
 
 	[TestFixture]
 	public class NotNullAspectTest
 	{
 		public abstract class TestObject1
 		{
-			public virtual void Foo1(string str1, [NotNull] string str2, string str3) {}
-			public virtual void Foo2(string str1, [NotNull("Null")] string str2, string str3) { }
-			public virtual void Foo3(string str1, [NotNull("Null: {0}")] string str2, string str3) { }
+			public virtual void Foo1(string str1, [NotNull] string? str2, string str3) {}
+			public virtual void Foo2(string str1, [NotNull("Null")] string? str2, string str3) { }
+			public virtual void Foo3(string str1, [NotNull("Null: {0}")] string? str2, string str3) { }
 		}
 
 		[Test]

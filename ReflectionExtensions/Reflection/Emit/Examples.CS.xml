@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <examples>
 
 <emit name="Emit">
@@ -8,8 +8,8 @@ using System;
 
 using NUnit.Framework;
 
-using BLToolkit.Reflection;
-using BLToolkit.Reflection.Emit;
+using ReflectionExtensions.Reflection;
+using ReflectionExtensions.Reflection.Emit;
 
 namespace Examples.Reflection.Emit
 {

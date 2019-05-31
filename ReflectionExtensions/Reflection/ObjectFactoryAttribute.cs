@@ -7,7 +7,7 @@ namespace ReflectionExtensions.Reflection
 	{
 		public ObjectFactoryAttribute(Type type)
 		{
-			if (type == null) throw new ArgumentNullException("type");
+			if (type == null) throw new ArgumentNullException(nameof(type));
 
 			ObjectFactory = Activator.CreateInstance(type) as IObjectFactory ??
 				throw new ArgumentException($"Type '{type}' does not implement IObjectFactory interface.");

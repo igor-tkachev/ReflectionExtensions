@@ -6,9 +6,6 @@ namespace ReflectionExtensions.Aspects
 {
 	using TypeBuilder.Builders;
 
-	/// <summary>
-	/// http://www.bltoolkit.net/Doc/Aspects/index.htm
-	/// </summary>
 	[AttributeUsage(
 		AttributeTargets.Class |
 		AttributeTargets.Interface |
@@ -37,8 +34,8 @@ namespace ReflectionExtensions.Aspects
 		}
 
 		private bool _hasFileName;
-		private string  _fileName;
-		public  string   FileName
+		private string? _fileName;
+		public  string?  FileName
 		{
 			get => _fileName;
 			set { _fileName = value; _hasFileName = true; }

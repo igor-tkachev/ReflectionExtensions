@@ -4,9 +4,6 @@ using System;
 
 namespace ReflectionExtensions.Aspects
 {
-	/// <summary>
-	/// http://www.bltoolkit.net/Doc/Aspects/index.htm
-	/// </summary>
 	[AttributeUsage(
 		AttributeTargets.Class |
 		AttributeTargets.Interface |
@@ -73,10 +70,7 @@ namespace ReflectionExtensions.Aspects
 
 		#endregion
 
-		public override bool LocalInterceptor
-		{
-			get { return true; }
-		}
+		public override bool LocalInterceptor => true;
 	}
 }
 

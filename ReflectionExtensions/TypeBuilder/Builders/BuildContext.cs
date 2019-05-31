@@ -120,16 +120,16 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		public FieldBuilder? GetField(string fieldName)
 		{
-			return GetItem<FieldBuilder>("$BLToolkit.Field." + fieldName);
+			return GetItem<FieldBuilder>("$ReflectionExtensions.Field." + fieldName);
 		}
 
 		public FieldBuilder CreateField(string fieldName, Type type, FieldAttributes attributes)
 		{
 			var field = TypeBuilder.DefineField(fieldName, type, attributes);
 
-			field.SetCustomAttribute(MethodBuilder.Type.Assembly.BLToolkitAttribute);
+			field.SetCustomAttribute(MethodBuilder.Type.Assembly.ReflectionExtensionsAttribute);
 
-			Items.Add("$BLToolkit.Field." + fieldName, field);
+			Items.Add("$ReflectionExtensions.Field." + fieldName, field);
 
 			return field;
 		}
@@ -156,7 +156,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		public MethodBuilderHelper GetFieldInstanceEnsurer(string fieldName)
 		{
-			return GetItem<MethodBuilderHelper>($"$BLToolkit.FieldInstanceEnsurer.{fieldName}");
+			return GetItem<MethodBuilderHelper>($"$ReflectionExtensions.FieldInstanceEnsurer.{fieldName}");
 		}
 
 		#endregion

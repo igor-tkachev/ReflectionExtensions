@@ -1,10 +1,9 @@
-﻿
+﻿#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 
-using System.Diagnostics;
-#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 
@@ -83,13 +82,13 @@ namespace ReflectionExtensions.Aspects
 
 		// to enable unlock in BeforeCall or in OnFinally
 
-		private void Lock()
+		void Lock()
 		{
 			Monitor.Enter(CacheSyncRoot);
 			_isLocked = Thread.CurrentThread.ManagedThreadId;
 		}
 
-		private void EndLock()
+		void EndLock()
 		{
 			if (_isLocked != Thread.CurrentThread.ManagedThreadId)
 				return;
@@ -184,6 +183,8 @@ namespace ReflectionExtensions.Aspects
 					: DateTime.Now.AddMilliseconds(maxCacheTime),
 			};
 
+			Debug.Assert(info.CallMethodInfo != null, "info.CallMethodInfo != null");
+
 			var pis = info.CallMethodInfo.Parameters;
 			var n = 0;
 
@@ -199,7 +200,10 @@ namespace ReflectionExtensions.Aspects
 
 				for (var i = 0; i < pis.Length; i++)
 					if (pis[i].ParameterType.IsByRef)
+					{
+						Debug.Assert(info.ParameterValues != null, "info.ParameterValues != null");
 						item.RefValues[n++] = info.ParameterValues[i];
+					}
 			}
 
 			Debug.Assert(cache != null, nameof(cache) + " != null");
@@ -231,11 +235,11 @@ namespace ReflectionExtensions.Aspects
 
 		public  static IsCacheableParameterType  IsCacheableParameterType
 		{
-			get { return _isCacheableParameterType; }
-			set { _isCacheableParameterType = value ?? IsCacheableParameterTypeInternal; }
+			get => _isCacheableParameterType;
+			set => _isCacheableParameterType = value ?? IsCacheableParameterTypeInternal;
 		}
 
-		private static bool IsCacheableParameterTypeInternal(Type parameterType)
+		static bool IsCacheableParameterTypeInternal(Type parameterType)
 		{
 			return parameterType.IsValueType || parameterType == typeof(string);
 		}
@@ -255,18 +259,23 @@ namespace ReflectionExtensions.Aspects
 
 		protected virtual IDictionary CreateCache()
 		{
-#if FW4
-			return new System.Collections.Concurrent.ConcurrentDictionary<CompoundValue, object>();
-#else
+#if NET20 || NET30 || NET35
 			return Hashtable.Synchronized(new Hashtable());
+#else
+			return new System.Collections.Concurrent.ConcurrentDictionary<CompoundValue, object>();
 #endif
 		}
 
 		protected static CompoundValue GetKey(InterceptCallInfo info)
 		{
+			Debug.Assert(info.CallMethodInfo != null, "info.CallMethodInfo != null");
+
 			var parInfo     = info.CallMethodInfo.Parameters;
 			var parValues   = info.ParameterValues;
-			var keyValues   = new object[parValues.Length];
+
+			Debug.Assert(parValues != null, nameof(parValues) + " != null");
+
+			var keyValues   = new object?[parValues.Length];
 			var cacheParams = info.CallMethodInfo.CacheableParameters;
 
 			if (cacheParams == null)
@@ -283,7 +292,7 @@ namespace ReflectionExtensions.Aspects
 			return new CompoundValue(keyValues);
 		}
 
-		protected static CacheAspectItem GetItem(IDictionary cache, CompoundValue key)
+		protected static CacheAspectItem? GetItem(IDictionary cache, CompoundValue key)
 		{
 			var obj = cache[key];
 
@@ -312,7 +321,7 @@ namespace ReflectionExtensions.Aspects
 		public static void ClearCache(MethodInfo methodInfo)
 		{
 			if (methodInfo == null)
-				throw new ArgumentNullException("methodInfo");
+				throw new ArgumentNullException(nameof(methodInfo));
 
 			var aspect = GetAspect(methodInfo);
 
@@ -349,7 +358,7 @@ namespace ReflectionExtensions.Aspects
 			var methodInfo = GetMethodInfo(declaringType, methodName, types);
 
 			if (methodInfo == null)
-				throw new ArgumentNullException("methodInfo");
+				throw new ArgumentNullException(nameof(methodInfo));
 
 			var aspect = GetAspect(methodInfo);
 
@@ -360,21 +369,21 @@ namespace ReflectionExtensions.Aspects
 		public static void ClearCache(Type declaringType)
 		{
 			if (declaringType == null)
-				throw new ArgumentNullException("declaringType");
+				throw new ArgumentNullException(nameof(declaringType));
 
 			if (declaringType.IsAbstract)
 				declaringType = TypeBuilder.TypeFactory.GetType(declaringType);
 
 			lock (RegisteredAspects.SyncRoot)
 				foreach (CacheAspect aspect in RegisteredAspects)
-					if (aspect._methodInfo.DeclaringType == declaringType)
+					if (aspect._methodInfo?.DeclaringType == declaringType)
 						CleanupThread.ClearCache(aspect);
 		}
 
 		public static MethodInfo GetMethodInfo(Type declaringType, string methodName, params Type[] parameterTypes)
 		{
 			if (declaringType == null)
-				throw new ArgumentNullException("declaringType");
+				throw new ArgumentNullException(nameof(declaringType));
 
 			if (declaringType.IsAbstract)
 				declaringType = TypeBuilder.TypeFactory.GetType(declaringType);
@@ -395,8 +404,7 @@ namespace ReflectionExtensions.Aspects
 					methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
 				if (methodInfo == null)
-					throw new ArgumentException(string.Format("Method '{0}.{1}' not found.",
-						declaringType.FullName, methodName));
+					throw new ArgumentException($"Method '{declaringType.FullName}.{methodName}' not found.");
 			}
 
 			return methodInfo;
@@ -414,33 +422,18 @@ namespace ReflectionExtensions.Aspects
 
 		#region Statistics
 
-		public static int WorkTimes
-		{
-			get { return CleanupThread.WorkTimes; }
-		}
-
-		public static TimeSpan WorkTime
-		{
-			get { return CleanupThread.WorkTime; }
-		}
-
-		public static int ObjectsExpired
-		{
-			get { return CleanupThread.ObjectsExpired; }
-		}
-
-		public static int ObjectsInCache
-		{
-			get { return CleanupThread.ObjectsInCache; }
-		}
+		public static int      WorkTimes      => CleanupThread.WorkTimes;
+		public static TimeSpan WorkTime       => CleanupThread.WorkTime;
+		public static int      ObjectsExpired => CleanupThread.ObjectsExpired;
+		public static int      ObjectsInCache => CleanupThread.ObjectsInCache;
 
 		#endregion
 
 		#region Cleanup Thread
 
-		private class CleanupThread
+		class CleanupThread
 		{
-			private CleanupThread() {}
+			CleanupThread() {}
 
 			internal static void Init()
 			{
@@ -453,10 +446,10 @@ namespace ReflectionExtensions.Aspects
 				Stop();
 			}
 
-			static volatile Timer  _timer;
+			static volatile Timer? _timer;
 			static readonly object _syncTimer = new object();
 
-			private static void Start()
+			static void Start()
 			{
 				if (_timer == null)
 					lock (_syncTimer)
@@ -467,7 +460,7 @@ namespace ReflectionExtensions.Aspects
 						}
 			}
 
-			private static void Stop()
+			static void Stop()
 			{
 				if (_timer != null)
 					lock (_syncTimer)
@@ -478,7 +471,7 @@ namespace ReflectionExtensions.Aspects
 						}
 			}
 
-			private static void Cleanup(object state)
+			static void Cleanup(object state)
 			{
 				if (!Monitor.TryEnter(RegisteredAspects.SyncRoot, 10))
 				{
@@ -492,7 +485,7 @@ namespace ReflectionExtensions.Aspects
 
 				try
 				{
-					_workTimes++;
+					WorkTimes++;
 
 					var list = new List<DictionaryEntry>();
 
@@ -504,10 +497,11 @@ namespace ReflectionExtensions.Aspects
 						var cache = aspect.Cache;
 
 						// cache can be in process now
-						if(!Monitor.TryEnter(aspect.CacheSyncRoot, 10))
+						if (!Monitor.TryEnter(aspect.CacheSyncRoot, 10))
 							continue;
 						try
 						{
+							Debug.Assert(cache != null, nameof(cache) + " != null");
 
 							foreach (DictionaryEntry de in cache)
 							{
@@ -533,7 +527,7 @@ namespace ReflectionExtensions.Aspects
 							foreach (var de in list)
 							{
 								cache.Remove(de.Key);
-								_objectsExpired++;
+								ObjectsExpired++;
 							}
 
 							list.Clear();
@@ -546,45 +540,20 @@ namespace ReflectionExtensions.Aspects
 						}
 					}
 
-					_objectsInCache = objectsInCache;
+					ObjectsInCache = objectsInCache;
 				}
 				finally
 				{
-					_workTime += DateTime.Now - start;
+					WorkTime += DateTime.Now - start;
 
 					Monitor.Exit(RegisteredAspects.SyncRoot);
 				}
 			}
 
-			private static int _workTimes;
-			public  static int  WorkTimes
-			{
-				get { return _workTimes; }
-			}
-
-			private static TimeSpan _workTime;
-			public  static TimeSpan  WorkTime
-			{
-				get { return _workTime; }
-			}
-
-			private static int _objectsExpired;
-			public  static int  ObjectsExpired
-			{
-				get { return _objectsExpired; }
-			}
-
-			private static int _objectsInCache;
-			public  static int  ObjectsInCache
-			{
-				get { return _objectsInCache; }
-			}
-
-			//public static void UnregisterCache(IDictionary cache)
-			//{
-			//	lock (RegisteredAspects.SyncRoot)
-			//		RegisteredAspects.Remove(cache);
-			//}
+			public static int      WorkTimes      { get; private set; }
+			public static TimeSpan WorkTime       { get; private set; }
+			public static int      ObjectsExpired { get; private set; }
+			public static int      ObjectsInCache { get; private set; }
 
 			public static void ClearCache(CacheAspect aspect)
 			{
@@ -595,9 +564,13 @@ namespace ReflectionExtensions.Aspects
 
 					if (!Monitor.TryEnter(aspect.CacheSyncRoot, 10))
 						return;
+
 					try
 					{
-						_objectsExpired += aspect.Cache.Count;
+						Debug.Assert(aspect.Cache != null, "aspect.Cache != null");
+
+						ObjectsExpired += aspect.Cache.Count;
+
 						aspect.Cache.Clear();
 					}
 					finally
@@ -616,10 +589,11 @@ namespace ReflectionExtensions.Aspects
 
 					if (!Monitor.TryEnter(aspect.CacheSyncRoot, 10))
 						return;
+
 					try
 					{
-						_objectsExpired += 1;
-						aspect.Cache.Remove(key);
+						ObjectsExpired += 1;
+						aspect.Cache?.Remove(key);
 					}
 					finally
 					{
@@ -637,7 +611,9 @@ namespace ReflectionExtensions.Aspects
 						if (!aspect.HasCache)
 							continue;
 
-						_objectsExpired += aspect.Cache.Count;
+						Debug.Assert(aspect.Cache != null, "aspect.Cache != null");
+
+						ObjectsExpired += aspect.Cache.Count;
 
 						if (!Monitor.TryEnter(aspect.CacheSyncRoot, 10))
 							continue;

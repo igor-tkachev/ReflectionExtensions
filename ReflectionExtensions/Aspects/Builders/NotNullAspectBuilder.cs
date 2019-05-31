@@ -4,11 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using System.Reflection.Emit;
 
 namespace ReflectionExtensions.Aspects.Builders
 {
-	using ReflectionExtensions.Reflection.Emit;
 	using ReflectionExtensions.TypeBuilder.Builders;
 
 	public class NotNullAspectBuilder : AbstractTypeBuilderBase
@@ -18,7 +16,7 @@ namespace ReflectionExtensions.Aspects.Builders
 			_message = message;
 		}
 
-		private readonly string _message;
+		readonly string _message;
 
 		public override int GetPriority(BuildContext context)
 		{

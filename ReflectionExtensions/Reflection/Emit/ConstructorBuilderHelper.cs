@@ -23,7 +23,7 @@ namespace ReflectionExtensions.Reflection.Emit
 			: base(typeBuilder)
 		{
 			ConstructorBuilder = constructorBuilder;
-			ConstructorBuilder.SetCustomAttribute(Type.Assembly.BLToolkitAttribute);
+			ConstructorBuilder.SetCustomAttribute(Type.Assembly.ReflectionExtensionsAttribute);
 		}
 
 		/// <summary>

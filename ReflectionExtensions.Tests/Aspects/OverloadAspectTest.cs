@@ -25,16 +25,16 @@ namespace ReflectionExtensions.Tests.Aspects
 				return inVal.ToUpper();
 			}
 
-			[Overload] abstract public T Test(T inVal);
-			[Overload] abstract public T Test(T inVal, out T outVal, ref T refVal);
-			[Overload] abstract public T Test(T inVal, DateTime dateVal);
+			[Overload] public abstract T Test(T inVal);
+			[Overload] public abstract T Test(T inVal, out T outVal, ref T refVal);
+			[Overload] public abstract T Test(T inVal, DateTime dateVal);
 		}
 
 		public abstract class TestObject
 		{
-			public int    IntValue;
-			public string StrValue;
-			public Guid   GuidValue;
+			public int     IntValue;
+			public string? StrValue;
+			public Guid    GuidValue;
 
 			public void Test(int intVal, Guid guidVal)
 			{
@@ -52,13 +52,13 @@ namespace ReflectionExtensions.Tests.Aspects
 
 			public void OutRefTest(int inVal, out int outVal, ref int refVal)
 			{
-				outVal = inVal;
+				outVal  = inVal;
 				refVal += inVal;
 			}
 
 			public void OutRefStructTest(int? inVal, out int? outVal, ref int? refVal)
 			{
-				outVal = inVal;
+				outVal  = inVal;
 				refVal += inVal;
 			}
 

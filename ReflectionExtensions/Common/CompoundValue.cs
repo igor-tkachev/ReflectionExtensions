@@ -5,7 +5,7 @@ namespace ReflectionExtensions.Common
 {
 	public class CompoundValue : IComparable, IEquatable<CompoundValue>
 	{
-		public CompoundValue(params object[] values)
+		public CompoundValue(params object?[] values)
 		{
 			if (values == null)
 				throw new ArgumentNullException(nameof(values));
@@ -18,14 +18,14 @@ namespace ReflectionExtensions.Common
 			_values = values;
 		}
 
-		readonly object[] _values;
-		readonly int      _hash;
+		readonly object?[] _values;
+		readonly int       _hash;
 
 		public int Count => _values.Length;
 
 		public object? this[int index] => _values[index];
 
-		static int CalcHashCode(object[] values)
+		static int CalcHashCode(object?[] values)
 		{
 			if (values.Length == 0)
 				return 0;
@@ -64,7 +64,7 @@ namespace ReflectionExtensions.Common
 
 #if NETCOREAPP1_0 || NETCOREAPP1_1 || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4 || NETSTANDARD1_5 || NETSTANDARD1_6 || NETSTANDARD2_0
 
-		public int Compare(object a, object b)
+		public int Compare(object? a, object? b)
 		{
 			if (a == b)    return 0;
 			if (a == null) return -1;
@@ -81,7 +81,7 @@ namespace ReflectionExtensions.Common
 
 #else
 
-		static int Compare(object a, object b)
+		static int Compare(object? a, object? b)
 		{
 			return Comparer.Default.Compare(a, b);
 		}

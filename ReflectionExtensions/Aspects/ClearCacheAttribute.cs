@@ -6,9 +6,6 @@ namespace ReflectionExtensions.Aspects
 {
 	using TypeBuilder.Builders;
 
-	/// <summary>
-	/// http://www.bltoolkit.net/Doc/Aspects/index.htm
-	/// </summary>
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Method, AllowMultiple=true)]
 	public class ClearCacheAttribute : AbstractTypeBuilderAttribute
 	{

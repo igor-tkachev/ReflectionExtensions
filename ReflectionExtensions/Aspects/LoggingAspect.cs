@@ -66,40 +66,11 @@ namespace ReflectionExtensions.Aspects
 
 		#region Parameters
 
-		private static bool _logParameters = true;
-		public  static bool  LogParameters
-		{
-			get { return _logParameters;  }
-			set { _logParameters = value; }
-		}
-
-		private static bool _logExceptions = true;
-		public  static bool  LogExceptions
-		{
-			get { return _logExceptions;  }
-			set { _logExceptions = value; }
-		}
-
-		private static int _minCallTime;
-		public  static int  MinCallTime
-		{
-			get { return _minCallTime;  }
-			set { _minCallTime = value; }
-		}
-
-		private static string _fileName;
-		public  static string  FileName
-		{
-			get { return _fileName;  }
-			set { _fileName = value; }
-		}
-
-		private static bool _isEnabled = true;
-		public  static bool  IsEnabled
-		{
-			get { return _isEnabled;  }
-			set { _isEnabled = value; }
-		}
+		public static bool   LogParameters { get; set; } = true;
+		public static bool   LogExceptions { get; set; } = true;
+		public static int    MinCallTime   { get; set; }
+		public static string FileName      { get; set; }
+		public static bool   IsEnabled     { get; set; } = true;
 
 		#endregion
 
@@ -107,7 +78,7 @@ namespace ReflectionExtensions.Aspects
 
 		public static LogOperation LogOperation { get; set; } = LogOperationInternal;
 
-		private static void LogOperationInternal(InterceptCallInfo info, Parameters parameters)
+		static void LogOperationInternal(InterceptCallInfo info, Parameters parameters)
 		{
 			var end  = DateTime.Now;
 			var time = (int)((end - info.BeginCallTime).TotalMilliseconds);
@@ -115,16 +86,19 @@ namespace ReflectionExtensions.Aspects
 			if (info.Exception != null && parameters.LogExceptions ||
 				info.Exception == null && time >= parameters.MinCallTime)
 			{
+				Debug.Assert(info.ParameterValues != null, "info.ParameterValues != null");
+
 				string? callParameters = null;
 				var     plen           = info.ParameterValues.Length;
 
 				if (parameters.LogParameters && plen > 0)
 				{
-					StringBuilder sb = new StringBuilder();
-					object[] values = info.ParameterValues;
+					var sb     = new StringBuilder();
+					var values = info.ParameterValues;
 
 					FormatParameter(values[0], sb);
-					for (int i = 1; i < plen; i++)
+
+					for (var i = 1; i < plen; i++)
 					{
 						FormatParameter(values[i], sb.Append(", "));
 					}
@@ -140,8 +114,8 @@ namespace ReflectionExtensions.Aspects
 				LogOutput(
 					string.Format("{0}: {1}.{2}({3}) - {4} ms{5}{6}.",
 						end,
-						info.CallMethodInfo.MethodInfo.DeclaringType.FullName,
-						info.CallMethodInfo.MethodInfo.Name,
+						info.CallMethodInfo?.MethodInfo.DeclaringType?.FullName,
+						info.CallMethodInfo?.MethodInfo.Name,
 						callParameters,
 						time,
 						info.Cached? " from cache": null,

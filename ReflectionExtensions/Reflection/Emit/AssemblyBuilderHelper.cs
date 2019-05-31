@@ -110,7 +110,7 @@ namespace ReflectionExtensions.Reflection.Emit
 					Thread.GetDomain().DefineDynamicAssembly(AssemblyName, AssemblyBuilderAccess.RunAndSave, assemblyDir);
 #endif
 
-				_assemblyBuilder.SetCustomAttribute(BLToolkitAttribute);
+				_assemblyBuilder.SetCustomAttribute(ReflectionExtensionsAttribute);
 
 				_assemblyBuilder.SetCustomAttribute(
 					new CustomAttributeBuilder(
@@ -161,30 +161,30 @@ namespace ReflectionExtensions.Reflection.Emit
 				if (_moduleBuilder == null)
 				{
 					_moduleBuilder = AssemblyBuilder.DefineDynamicModule(ModulePath);
-					_moduleBuilder.SetCustomAttribute(BLToolkitAttribute);
+					_moduleBuilder.SetCustomAttribute(ReflectionExtensionsAttribute);
 				}
 
 				return _moduleBuilder;
 			}
 		}
 
-		private CustomAttributeBuilder? _blToolkitAttribute;
+		CustomAttributeBuilder? _reflectionExtensionsAttribute;
 		/// <summary>
-		/// Retrieves a cached instance of <see cref="ReflectionExtensions.TypeBuilder.BLToolkitGeneratedAttribute"/> builder.
+		/// Retrieves a cached instance of <see cref="ReflectionExtensionsReflectionExtensionsGeneratedAttribute"/> builder.
 		/// </summary>
-		public  CustomAttributeBuilder   BLToolkitAttribute
+		public  CustomAttributeBuilder   ReflectionExtensionsAttribute
 		{
 			get
 			{
-				if (_blToolkitAttribute == null)
+				if (_reflectionExtensionsAttribute == null)
 				{
-					var at = typeof(TypeBuilder.BLToolkitGeneratedAttribute);
+					var at = typeof(TypeBuilder.ReflectionExtensionsGeneratedAttribute);
 					var ci = at.GetConstructorEx(Type.EmptyTypes);
 
-					_blToolkitAttribute = new CustomAttributeBuilder(ci, new object[0]);
+					_reflectionExtensionsAttribute = new CustomAttributeBuilder(ci, new object[0]);
 				}
 
-				return _blToolkitAttribute;
+				return _reflectionExtensionsAttribute;
 			}
 		}
 

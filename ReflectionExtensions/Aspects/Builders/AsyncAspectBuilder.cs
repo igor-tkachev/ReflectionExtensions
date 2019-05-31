@@ -1,9 +1,8 @@
-﻿
+﻿#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 
-using System.Diagnostics;
-#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 
@@ -71,11 +70,12 @@ namespace ReflectionExtensions.Aspects.Builders
 				if (parameters.Length == 1 && parameters[0].ParameterType == typeof(IAsyncResult))
 					BuildEndMethod();
 				else
-					throw new TypeBuilderException(string.Format("Method '{0}.{1}' is not a 'Begin' nor an 'End' method.", mi.DeclaringType.FullName, mi.Name));
+					throw new TypeBuilderException(
+						$"Method '{mi.DeclaringType?.FullName}.{mi.Name}' is not a 'Begin' nor an 'End' method.");
 			}
 		}
 
-		private void BuildBeginMethod()
+		void BuildBeginMethod()
 		{
 			var mi           = Context.CurrentMethod;
 			var method       = GetTargetMethod(Context, "Begin");
@@ -148,7 +148,7 @@ namespace ReflectionExtensions.Aspects.Builders
 				;
 		}
 
-		private void BuildEndMethod()
+		void BuildEndMethod()
 		{
 			var method       = GetTargetMethod(Context, "End");
 			var delegateType = EnsureDelegateType(Context, method);
@@ -171,7 +171,7 @@ namespace ReflectionExtensions.Aspects.Builders
 				emit.stloc(Context.ReturnValue);
 		}
 
-		private MethodInfo GetTargetMethod(BuildContext context, string prefix)
+		MethodInfo GetTargetMethod(BuildContext context, string prefix)
 		{
 			var targetMethodName = _targetMethodName;
 
@@ -193,7 +193,7 @@ namespace ReflectionExtensions.Aspects.Builders
 				context.Type.GetMethod(targetMethodName, _parameterTypes);
 		}
 
-		private static Type EnsureDelegateType(BuildContext context, MethodInfo method)
+		static Type EnsureDelegateType(BuildContext context, MethodInfo method)
 		{
 			// The delegate should be defined as inner type of context.TypeBuilder.
 			// It's possible, but we can not define and use newly defined type as Emit target in its owner type.
@@ -257,24 +257,23 @@ namespace ReflectionExtensions.Aspects.Builders
 		#region Helper
 
 		/// <summary>
-		/// Reserved for internal BLToolkit use.
+		/// Reserved for internal ReflectionExtensions use.
 		/// </summary>
 		public class InternalAsyncResult : IAsyncResult
 		{
-			public IAsyncResult  InnerResult;
-			public Delegate      Delegate;
-			public AsyncCallback AsyncCallback;
+			public IAsyncResult?  InnerResult;
+			public Delegate?      Delegate;
+			public AsyncCallback? AsyncCallback;
 
 			public void CallBack(IAsyncResult ar)
 			{
-				if (AsyncCallback != null)
-					AsyncCallback(this);
+				AsyncCallback?.Invoke(this);
 			}
 
-			public bool       IsCompleted            { get { return InnerResult.IsCompleted; } }
-			public WaitHandle AsyncWaitHandle        { get { return InnerResult.AsyncWaitHandle; } }
-			public object     AsyncState             { get { return InnerResult.AsyncState; } }
-			public bool       CompletedSynchronously { get { return InnerResult.CompletedSynchronously; } }
+			public bool        IsCompleted            => InnerResult?.IsCompleted ?? false;
+			public WaitHandle? AsyncWaitHandle        => InnerResult?.AsyncWaitHandle;
+			public object?     AsyncState             => InnerResult?.AsyncState;
+			public bool        CompletedSynchronously => InnerResult?.CompletedSynchronously ?? false;
 		}
 
 		#endregion

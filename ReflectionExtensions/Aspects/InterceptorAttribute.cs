@@ -48,11 +48,11 @@ namespace ReflectionExtensions.Aspects
 			LocalInterceptor = localInterceptor;
 		}
 
-		public  virtual  Type?         InterceptorType  { get; }
-		public  virtual  InterceptType InterceptType    { get; }
-		public  virtual  int           Priority         { get; }
-		public  virtual  string?       ConfigString     { get; }
-		public  virtual  bool          LocalInterceptor { get; }
+		public virtual Type?         InterceptorType  { get; }
+		public virtual InterceptType InterceptType    { get; }
+		public virtual int           Priority         { get; }
+		public virtual string?       ConfigString     { get; }
+		public virtual bool          LocalInterceptor { get; }
 
 		public override IAbstractTypeBuilder TypeBuilder =>
 			new Builders.InterceptorAspectBuilder(InterceptorType, InterceptType, ConfigString, Priority, LocalInterceptor);

@@ -29,17 +29,6 @@ namespace ReflectionExtensions.Reflection
 		{
 		}
 
-		static MemberInfo GetMemberInfo(TypeAccessor typeAccessor, string memberName)
-		{
-#if NET20 || NET30
-			var memberInfo = typeAccessor.Type.GetMemberEx(memberName)[0];
-#else
-			var memberInfo = Expression.PropertyOrField(Expression.Constant(null, typeAccessor.Type), memberName).Member;
-#endif
-
-			return memberInfo;
-		}
-
 		internal MemberAccessor([NotNull] TypeAccessor typeAccessor, [NotNull] MemberInfo memberInfo)
 		{
 			TypeAccessor = typeAccessor;

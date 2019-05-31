@@ -7,12 +7,8 @@ using System.Threading;
 
 namespace ReflectionExtensions.Aspects
 {
-	public delegate MethodCallCounter CreateCounter(CallMethodInfo methodInfo);
+	public delegate MethodCallCounter? CreateCounter(CallMethodInfo methodInfo);
 
-	/// <summary>
-	/// http://www.bltoolkit.net/Doc/Aspects/index.htm
-	/// </summary>
-	[System.Diagnostics.DebuggerStepThrough]
 	public class CounterAspect : Interceptor
 	{
 		public override void Init(CallMethodInfo info, string configString)
@@ -53,12 +49,7 @@ namespace ReflectionExtensions.Aspects
 
 		#region Parameters
 
-		private static bool _isEnabled = true;
-		public  static bool  IsEnabled
-		{
-			get { return _isEnabled;  }
-			set { _isEnabled = value; }
-		}
+		public static bool IsEnabled { get; set; } = true;
 
 		#endregion
 
@@ -69,27 +60,27 @@ namespace ReflectionExtensions.Aspects
 		public static MethodCallCounter? GetCounter(MethodInfo methodInfo)
 		{
 			lock (Counters.SyncRoot)
-			foreach (MethodCallCounter c in Counters)
-			{
-				if ((methodInfo.DeclaringType == c.MethodInfo.DeclaringType ||
-					 methodInfo.DeclaringType == c.MethodInfo.DeclaringType.BaseType) &&
-					 methodInfo.Name          == c.MethodInfo.Name)
+				foreach (MethodCallCounter c in Counters)
 				{
-					var ps1 = c.MethodInfo.GetParameters();
-					var ps2 =   methodInfo.GetParameters();
-
-					if (ps1.Length == ps2.Length)
+					if ((methodInfo.DeclaringType == c.MethodInfo.DeclaringType ||
+						 methodInfo.DeclaringType == c.MethodInfo.DeclaringType.BaseType) &&
+						 methodInfo.Name          == c.MethodInfo.Name)
 					{
-						bool isMatched = true;
+						var ps1 = c.MethodInfo.GetParameters();
+						var ps2 =   methodInfo.GetParameters();
 
-						for (int i = 0; isMatched && i < ps1.Length; i++)
-							isMatched = ps1[i].ParameterType == ps2[i].ParameterType;
+						if (ps1.Length == ps2.Length)
+						{
+							bool isMatched = true;
 
-						if (isMatched)
-							return c;
+							for (int i = 0; isMatched && i < ps1.Length; i++)
+								isMatched = ps1[i].ParameterType == ps2[i].ParameterType;
+
+							if (isMatched)
+								return c;
+						}
 					}
 				}
-			}
 
 			return null;
 		}
@@ -98,13 +89,13 @@ namespace ReflectionExtensions.Aspects
 
 		private static CreateCounter _createCounter = CreateCounterInternal;
 
-		public static CreateCounter CreateCounter
+		public  static CreateCounter  CreateCounter
 		{
-			get { return _createCounter; }
-			set { _createCounter = value ?? new CreateCounter(CreateCounterInternal); }
+			get => _createCounter;
+			set => _createCounter = value ?? CreateCounterInternal;
 		}
 
-		private static MethodCallCounter CreateCounterInternal(CallMethodInfo methodInfo)
+		static MethodCallCounter CreateCounterInternal(CallMethodInfo methodInfo)
 		{
 			return new MethodCallCounter(methodInfo);
 		}

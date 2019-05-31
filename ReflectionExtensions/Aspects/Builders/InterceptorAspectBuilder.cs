@@ -1,9 +1,8 @@
-﻿
+﻿#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 
-using System.Diagnostics;
-#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
@@ -154,6 +153,8 @@ namespace ReflectionExtensions.Aspects.Builders
 					throw new InvalidOperationException();
 			}
 
+			Debug.Assert(_interceptorField != null, nameof(_interceptorField) + " != null");
+
 			emit
 				.ldloc    (_infoField)
 				.ldc_i4   ((int)interceptType)
@@ -209,11 +210,11 @@ namespace ReflectionExtensions.Aspects.Builders
 				;
 		}
 
-		private static int _methodCounter;
+		static int _methodCounter;
 
-		private LocalBuilder GetInfoField()
+		LocalBuilder GetInfoField()
 		{
-			var field = Context.GetItem<LocalBuilder>("$BLToolkit.InfoField");
+			var field = Context.GetItem<LocalBuilder>("$ReflectionExtensions.InfoField");
 
 			if (field == null)
 			{
@@ -244,15 +245,17 @@ namespace ReflectionExtensions.Aspects.Builders
 					.LoadField(syncRoot)
 					.call(typeof(Monitor), "Enter", typeof(object));
 
-
 				var checkMethodInfo = emit.DefineLabel();
+				var constructorInfo = typeof(CallMethodInfo).GetConstructorEx(typeof(MethodInfo));
+
+				Debug.Assert(constructorInfo != null, nameof(constructorInfo) + " != null");
 
 				emit
 					.LoadField (methodInfo)
 					.brtrue_s  (checkMethodInfo)
 					.call      (typeof(MethodBase), "GetCurrentMethod")
 					.castclass (typeof(MethodInfo))
-					.newobj    (typeof(CallMethodInfo).GetConstructorEx(typeof(MethodInfo)))
+					.newobj    (constructorInfo)
 					.stsfld    (methodInfo)
 					.LoadField (methodInfo)
 					.LoadField (syncRoot)
@@ -270,15 +273,23 @@ namespace ReflectionExtensions.Aspects.Builders
 				//
 				field = emit.DeclareLocal(typeof(InterceptCallInfo));
 
+				var constructor        = typeof(InterceptCallInfo).GetConstructorEx();
+				var objectProperty     = typeof(InterceptCallInfo).GetProperty(nameof(InterceptCallInfo.Object));
+				var methodInfoProperty = typeof(InterceptCallInfo).GetProperty(nameof(InterceptCallInfo.CallMethodInfo));
+
+				Debug.Assert(constructor        != null, nameof(constructor) + " != null");
+				Debug.Assert(objectProperty     != null, nameof(objectProperty) + " != null");
+				Debug.Assert(methodInfoProperty != null, nameof(methodInfoProperty) + " != null");
+
 				emit
-					.newobj   (typeof(InterceptCallInfo).GetConstructorEx())
+					.newobj   (constructor)
 					.dup
 					.ldarg_0
-					.callvirt (typeof(InterceptCallInfo).GetProperty("Object").GetSetMethod())
+					.callvirt (objectProperty.GetSetMethod())
 
 					.dup
 					.LoadField(methodInfo)
-					.callvirt (typeof(InterceptCallInfo).GetProperty("CallMethodInfo").GetSetMethod())
+					.callvirt (methodInfoProperty.GetSetMethod())
 					;
 
 				var parameters = Context.CurrentMethod.GetParameters();
@@ -302,23 +313,21 @@ namespace ReflectionExtensions.Aspects.Builders
 
 				emit.stloc(field);
 
-				Context.Items.Add("$BLToolkit.MethodInfo", methodInfo);
-				Context.Items.Add("$BLToolkit.InfoField",  field);
-				Context.Items.Add("$BLToolkit.SyncRoot",   syncRoot);
+				Context.Items.Add("$ReflectionExtensions.MethodInfo", methodInfo);
+				Context.Items.Add("$ReflectionExtensions.InfoField",  field);
+				Context.Items.Add("$ReflectionExtensions.SyncRoot",   syncRoot);
 			}
 
 			return field;
 		}
 
-		private FieldBuilder GetInterceptorField()
+		FieldBuilder GetInterceptorField()
 		{
-			var fieldName = "_interceptor$" + _interceptorType.FullName + "$_" + Context.CurrentMethod.Name + _methodCounter;
+			var fieldName = $"_interceptor${_interceptorType?.FullName}$_{Context.CurrentMethod.Name}{_methodCounter}";
 			var field     = Context.GetField(fieldName);
 
 			if (field == null)
 			{
-
-
 				// Create MethodInfo field.
 				//
 				field = _localInterceptor?
@@ -328,25 +337,28 @@ namespace ReflectionExtensions.Aspects.Builders
 				var emit = Context.MethodBuilder.Emitter;
 
 				var checkInterceptor = emit.DefineLabel();
-				var methodInfo       = Context.GetItem<FieldBuilder>("$BLToolkit.MethodInfo");
-				var syncRoot         = Context.GetItem<FieldBuilder>("$BLToolkit.SyncRoot");
+				var methodInfo       = Context.GetItem<FieldBuilder>("$ReflectionExtensions.MethodInfo");
+				var syncRoot         = Context.GetItem<FieldBuilder>("$ReflectionExtensions.SyncRoot");
 
 				emit.BeginExceptionBlock();
 				emit
 					.LoadField(syncRoot)
 					.call(typeof(Monitor), "Enter", typeof(object));
 
-
 				emit
 					.LoadField (field)
 					.brtrue_s  (checkInterceptor)
 					;
 
-					if (!field.IsStatic)
-						emit.ldarg_0.end();
+				if (!field.IsStatic)
+					emit.ldarg_0.end();
+
+				var ctor = _interceptorType?.GetConstructorEx();
+
+				Debug.Assert(ctor != null, nameof(ctor) + " != null");
 
 				emit
-					.newobj    (_interceptorType.GetConstructorEx())
+					.newobj    (ctor)
 					.castclass (typeof(IInterceptor))
 					;
 
@@ -384,9 +396,9 @@ namespace ReflectionExtensions.Aspects.Builders
 
 		protected override void EndMethodBuild()
 		{
-			Context.Items.Remove("$BLToolkit.MethodInfo");
-			Context.Items.Remove("$BLToolkit.InfoField");
-			Context.Items.Remove("$BLToolkit.SyncRoot");
+			Context.Items.Remove("$ReflectionExtensions.MethodInfo");
+			Context.Items.Remove("$ReflectionExtensions.InfoField");
+			Context.Items.Remove("$ReflectionExtensions.SyncRoot");
 		}
 	}
 }

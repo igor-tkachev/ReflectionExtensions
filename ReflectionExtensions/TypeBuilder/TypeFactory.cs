@@ -137,7 +137,7 @@ namespace ReflectionExtensions.TypeBuilder
 			if (sourceType.IsValueTypeEx())
 				return sourceType;
 
-			if (!sourceType.IsAbstract && sourceType.IsDefinedEx(typeof(BLToolkitGeneratedAttribute), true))
+			if (!sourceType.IsAbstract && sourceType.IsDefinedEx(typeof(ReflectionExtensionsGeneratedAttribute), true))
 				return sourceType;
 
 			var t = GetType(sourceType, sourceType, new AbstractClassBuilder(sourceType));

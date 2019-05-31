@@ -1,9 +1,8 @@
-﻿
+﻿#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 
-using System.Diagnostics;
-#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace ReflectionExtensions.Aspects.Builders
@@ -178,11 +177,11 @@ namespace ReflectionExtensions.Aspects.Builders
 				if (m.IsDefined(typeof(OverloadAttribute), true))
 					continue;
 
-				ParameterInfo[] overloadedMethodParameters = m.GetParameters();
+				var overloadedMethodParameters = m.GetParameters();
 				if (overloadedMethodParameters.Length <= bestMatchParametersCount)
 					continue;
 
-				int matchedParameters = MatchParameters(overloadedMethodParameters, currentMethodParameters);
+				var matchedParameters = MatchParameters(overloadedMethodParameters, currentMethodParameters);
 				if (matchedParameters <= bestMatchParametersCount)
 					continue;
 

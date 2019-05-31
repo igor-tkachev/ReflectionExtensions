@@ -1,8 +1,7 @@
-﻿
+﻿#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 
-using System.Diagnostics;
-#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Collections.Generic;
@@ -639,11 +638,11 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				return;
 
 			var memberParams = InitContextType.GetProperty("MemberParameters").GetSetMethod();
-			var parentField  = Context.GetItem<LocalBuilder>("$BLToolkit.InitContext.Parent");
+			var parentField  = Context.GetItem<LocalBuilder>("$ReflectionExtensions.InitContext.Parent");
 
 			if (parentField == null)
 			{
-				Context.Items.Add("$BLToolkit.InitContext.Parent", parentField = emit.DeclareLocal(typeof(object)));
+				Context.Items.Add("$ReflectionExtensions.InitContext.Parent", parentField = emit.DeclareLocal(typeof(object)));
 
 				var label = emit.DefineLabel();
 				var ctor  = InitContextType.GetConstructorEx();
@@ -675,7 +674,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				.callvirt (InitContextType.GetProperty("Parent").GetSetMethod())
 				;
 
-			var isDirty = Context.GetItem<bool?>("$BLToolkit.InitContext.DirtyParameters");
+			var isDirty = Context.GetItem<bool?>("$ReflectionExtensions.InitContext.DirtyParameters");
 
 			if (parameters != null)
 			{
@@ -694,10 +693,10 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 					;
 			}
 
-			if (Context.Items.ContainsKey("$BLToolkit.InitContext.DirtyParameters"))
-				Context.Items["$BLToolkit.InitContext.DirtyParameters"] = (bool?)(parameters != null);
+			if (Context.Items.ContainsKey("$ReflectionExtensions.InitContext.DirtyParameters"))
+				Context.Items["$ReflectionExtensions.InitContext.DirtyParameters"] = (bool?)(parameters != null);
 			else
-				Context.Items.Add("$BLToolkit.InitContext.DirtyParameters", (bool?)(parameters != null));
+				Context.Items.Add("$ReflectionExtensions.InitContext.DirtyParameters", (bool?)(parameters != null));
 
 			if (objectType.IsAbstract)
 			{
@@ -759,7 +758,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 			if (ci != null || objectType.IsAbstract)
 				CreateInitContextDefaultInstance(
-					"$BLToolkit.DefaultInitContext.", field, fieldType, objectType, emit, ps);
+					"$ReflectionExtensions.DefaultInitContext.", field, fieldType, objectType, emit, ps);
 			else if (ps == null)
 				CreateDefaultInstance(field, fieldType, objectType, emit);
 			else
@@ -817,7 +816,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 					.callvirt (memberParams)
 					;
 			}
-			else if ((bool)Context.Items["$BLToolkit.Default.DirtyParameters"])
+			else if ((bool)Context.Items["$ReflectionExtensions.Default.DirtyParameters"])
 			{
 				emit
 					.ldloc    (initField)
@@ -826,7 +825,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 					;
 			}
 
-			Context.Items["$BLToolkit.Default.DirtyParameters"] = parameters != null;
+			Context.Items["$ReflectionExtensions.Default.DirtyParameters"] = parameters != null;
 
 			if (objectType.IsAbstract)
 			{
@@ -890,7 +889,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 					.stloc    (initField)
 					;
 
-				Context.Items.Add("$BLToolkit.Default.DirtyParameters", false);
+				Context.Items.Add("$ReflectionExtensions.Default.DirtyParameters", false);
 			}
 
 			return initField;
@@ -955,7 +954,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 				.ret()
 				;
 
-			Context.Items.Add("$BLToolkit.FieldInstanceEnsurer." + fieldName, ensurer);
+			Context.Items.Add("$ReflectionExtensions.FieldInstanceEnsurer." + fieldName, ensurer);
 		}
 
 		void CreateInitContextLazyInstance(
@@ -1043,7 +1042,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 		protected override void AfterBuildType()
 		{
-			var isDirty = Context.GetItem<bool?>("$BLToolkit.InitContext.DirtyParameters");
+			var isDirty = Context.GetItem<bool?>("$ReflectionExtensions.InitContext.DirtyParameters");
 
 			if (isDirty != null && isDirty.Value)
 			{
@@ -1054,7 +1053,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 					;
 			}
 
-			var localBuilder = Context.GetItem<LocalBuilder>("$BLToolkit.InitContext.Parent");
+			var localBuilder = Context.GetItem<LocalBuilder>("$ReflectionExtensions.InitContext.Parent");
 
 			if (localBuilder != null)
 			{
@@ -1087,7 +1086,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 
 					if (ci != null)
 					{
-						var initField = GetInitContextBuilder("$BLToolkit.DefaultInitContext.", emit);
+						var initField = GetInitContextBuilder("$ReflectionExtensions.DefaultInitContext.", emit);
 
 						emit
 							.ldarg_0

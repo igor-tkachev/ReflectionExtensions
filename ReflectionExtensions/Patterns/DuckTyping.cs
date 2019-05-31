@@ -1,9 +1,8 @@
-﻿
+﻿#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 
-using System.Diagnostics;
-#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using JetBrains.Annotations;
 
@@ -45,7 +44,7 @@ namespace ReflectionExtensions.Patterns
 
 			Dictionary<object,Type?> types;
 
-			lock(_duckTypes)
+			lock (_duckTypes)
 				if (!_duckTypes.TryGetValue(interfaceType, out types))
 					_duckTypes.Add(interfaceType, types = new Dictionary<object,Type?>());
 
@@ -181,7 +180,7 @@ namespace ReflectionExtensions.Patterns
 		{
 			if (objects == null) throw new ArgumentNullException(nameof(objects));
 
-			object?[] result = new object[objects.Length];
+			var result = new object?[objects.Length];
 
 			for (var i = 0; i < objects.Length; i++)
 				result[i] = interfaceType.Implement(baseObjectType, objects[i], throwException);
@@ -318,7 +317,7 @@ namespace ReflectionExtensions.Patterns
 		{
 			if (objects == null) throw new ArgumentNullException(nameof(objects));
 
-			TI?[] result = new TI[objects.Length];
+			var result = new TI?[objects.Length];
 
 			for (var i = 0; i < objects.Length; i++)
 				result[i] = Implement<TI>(objects[i], throwException);
@@ -364,7 +363,7 @@ namespace ReflectionExtensions.Patterns
 		{
 			if (objects == null) throw new ArgumentNullException(nameof(objects));
 
-			TI?[] result = new TI[objects.Length];
+			var result = new TI?[objects.Length];
 
 			for (var i = 0; i < objects.Length; i++)
 				result[i] = Implement<TI,T>(objects[i], throwException);

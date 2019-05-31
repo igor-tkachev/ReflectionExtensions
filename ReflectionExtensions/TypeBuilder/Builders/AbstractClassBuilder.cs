@@ -81,7 +81,7 @@ namespace ReflectionExtensions.TypeBuilder.Builders
 			typeShortName = typeShortName.Replace('+', '.');
 
 			typeFullName = typeFullName.Substring(0, typeFullName.Length - typeShortName.Length);
-			typeFullName = typeFullName + "BLToolkitExtension." + typeShortName;
+			typeFullName = $"{typeFullName}ReflectionExtensions.{typeShortName}";
 
 			return typeFullName;
 		}

@@ -1,7 +1,6 @@
 ﻿#if !NETCOREAPP1_0 && !NETCOREAPP1_1 && !NETSTANDARD1_0 && !NETSTANDARD1_1 && !NETSTANDARD1_2 && !NETSTANDARD1_3 && !NETSTANDARD1_4 && !NETSTANDARD1_5 && !NETSTANDARD1_6 && !NETSTANDARD2_0
 
 using System;
-using System.Reflection;
 
 using NUnit.Framework;
 
@@ -9,7 +8,6 @@ namespace ReflectionExtensions.Tests.Aspects
 {
 	using ReflectionExtensions.Aspects;
 	using ReflectionExtensions.Reflection;
-	using ReflectionExtensions.TypeBuilder;
 	using ReflectionExtensions.TypeBuilder.Builders;
 
 	[TestFixture]
@@ -23,7 +21,7 @@ namespace ReflectionExtensions.Tests.Aspects
 
 			public void Intercept(InterceptCallInfo info)
 			{
-				if (info.CallMethodInfo.MethodInfo.ReturnType == typeof(int))
+				if (info.CallMethodInfo?.MethodInfo.ReturnType == typeof(int))
 					info.ReturnValue = 10;
 			}
 		}
@@ -45,20 +43,20 @@ namespace ReflectionExtensions.Tests.Aspects
 
 				protected override void AfterCall(InterceptCallInfo info)
 				{
-					info.ReturnValue = (int)info.ReturnValue + (int)info.Items["ReturnValue"];
+					info.ReturnValue = (int)(info.ReturnValue ?? 0) + (int)info.Items["ReturnValue"];
 				}
 			}
 
 			[Interceptor(
 				typeof(PropInterceptor), InterceptType.BeforeCall | InterceptType.AfterCall,
 				TypeBuilderConsts.Priority.Normal - 100)]
-			public virtual int Prop { get { return 50; } }
+			public virtual int Prop => 50;
 		}
 
 		[Test]
 		public void Test()
 		{
-			TestClass t = (TestClass)TypeAccessor.CreateInstance(typeof(TestClass));
+			var t = (TestClass)TypeAccessor.CreateInstance(typeof(TestClass));
 
 			int     i2 = 2;
 			int     i3;
