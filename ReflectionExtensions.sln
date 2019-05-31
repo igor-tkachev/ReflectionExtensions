@@ -11,6 +11,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{C2E1D194-43D2-4AFD-A135-9127A42E6973}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		Build.cmd = Build.cmd
+		LICENSE.TXT = LICENSE.TXT
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReflectionExtensions", "ReflectionExtensions\ReflectionExtensions.csproj", "{3E710714-CDA4-41D5-A324-EC8ED52CAC39}"
