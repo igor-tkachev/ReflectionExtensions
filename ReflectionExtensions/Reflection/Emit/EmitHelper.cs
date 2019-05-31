@@ -3516,7 +3516,7 @@ namespace ReflectionExtensions.Reflection.Emit
 		/// Loads a type instance at runtime.
 		/// </summary>
 		/// <param name="type">A type</param>
-		public EmitHelper LoadType(Type type)
+		public EmitHelper LoadType(Type? type)
 		{
 			return type == null?
 				ldnull:

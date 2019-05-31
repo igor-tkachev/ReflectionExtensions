@@ -59,7 +59,7 @@ namespace ReflectionExtensions.Reflection
 			return null;
 		}
 
-		static bool CompareParameterTypes(Type goal, Type probe)
+		public static bool CompareParameterTypes(Type goal, Type probe)
 		{
 			if (goal == probe)
 				return true;

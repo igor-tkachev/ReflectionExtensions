@@ -153,7 +153,7 @@ namespace ReflectionExtensions.TypeBuilder
 		public static T CreateInstance<T>()
 			where T: class
 		{
-			return Activator.CreateInstance<T>();
+			return (T)Activator.CreateInstance(TypeFactory.GetType(typeof(T)));
 		}
 
 #else
